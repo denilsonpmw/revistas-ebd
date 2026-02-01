@@ -9,6 +9,9 @@ export default function UsersPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showPendingOnly, setShowPendingOnly] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [selectedUserForReset, setSelectedUserForReset] = useState(null);
+  const [resetPassword, setResetPassword] = useState(null);
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -88,6 +91,21 @@ export default function UsersPage() {
     }
   });
 
+  // Mutation para resetar senha
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (id) => {
+      return await api.patch(`/users/${id}/reset-password`);
+    },
+    onSuccess: (data) => {
+      setResetPassword(data.tempPassword);
+      toast.success('Senha resetada com sucesso!');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Erro ao resetar senha');
+      setShowResetPasswordModal(false);
+    }
+  });
+
   const onSubmit = (data) => {
     if (editingUser) {
       updateMutation.mutate({ id: editingUser.id, ...data });
@@ -112,6 +130,24 @@ export default function UsersPage() {
     if (confirm(`Tem certeza que deseja remover o usuário ${user.name}?`)) {
       deleteMutation.mutate(user.id);
     }
+  };
+
+  const handleResetPassword = (user) => {
+    setSelectedUserForReset(user);
+    setResetPassword(null);
+    setShowResetPasswordModal(true);
+  };
+
+  const confirmResetPassword = () => {
+    if (selectedUserForReset) {
+      resetPasswordMutation.mutate(selectedUserForReset.id);
+    }
+  };
+
+  const closeResetPasswordModal = () => {
+    setShowResetPasswordModal(false);
+    setSelectedUserForReset(null);
+    setResetPassword(null);
   };
 
   const handleToggleActive = (user) => {
@@ -252,6 +288,15 @@ export default function UsersPage() {
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleResetPassword(user)}
+                          className="text-purple-400 hover:text-purple-300"
+                          title="Resetar Senha"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                           </svg>
                         </button>
                         <button
@@ -407,6 +452,80 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de Reset de Senha */}
+      {showResetPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-slate-100 mb-4">
+                Resetar Senha
+              </h2>
+
+              {!resetPassword ? (
+                <>
+                  <p className="text-slate-300 mb-4">
+                    Deseja gerar uma nova senha temporária para <strong>{selectedUserForReset?.name}</strong>?
+                  </p>
+                  <p className="text-sm text-slate-400 mb-6">
+                    Uma senha aleatória será gerada e exibida após a confirmação.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={closeResetPasswordModal}
+                      className="flex-1 px-4 py-2 bg-slate-800 text-slate-100 rounded-lg hover:bg-slate-700 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={confirmResetPassword}
+                      disabled={resetPasswordMutation.isPending}
+                      className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                    >
+                      {resetPasswordMutation.isPending ? 'Processando...' : 'Confirmar'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 mb-4">
+                    <p className="text-green-300 font-semibold mb-2">✅ Senha Resetada com Sucesso!</p>
+                    <p className="text-sm text-green-200 mb-3">
+                      Envie a nova senha temporária para o usuário:
+                    </p>
+                    <div className="bg-slate-800 rounded p-3 mb-3">
+                      <p className="text-slate-100 font-mono text-center text-lg font-bold">
+                        {resetPassword}
+                      </p>
+                    </div>
+                    <p className="text-xs text-green-300">
+                      O usuário poderá alterar a senha após fazer login.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(resetPassword);
+                        toast.success('Senha copiada!');
+                      }}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      📋 Copiar
+                    </button>
+                    <button
+                      onClick={closeResetPasswordModal}
+                      className="flex-1 px-4 py-2 bg-slate-800 text-slate-100 rounded-lg hover:bg-slate-700 transition-colors"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

@@ -1,28 +1,76 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { apiRequest } from '../api/client';
+import { getToken } from '../api/client';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function VerifyPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
-  const { loginWithToken } = useAuth();
+  const { loginWithToken, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    // Se já está logado, redirecionar direto
+    if (user) {
+      navigate('/app', { replace: true });
+      return;
+    }
+
+    const verificationKey = token ? `verify:${token}` : null;
+    if (verificationKey && sessionStorage.getItem(verificationKey)) {
+      return;
+    }
+
+    if (!token || attempted) return;
+    if (verificationKey) {
+      sessionStorage.setItem(verificationKey, '1');
+    }
+    setAttempted(true);
     setLoading(true);
-    apiRequest(`/auth/verify?token=${encodeURIComponent(token)}`)
-      .then((data) => {
-        loginWithToken(data.token, data.user);
-        toast.success('Login realizado');
-        navigate('/app');
+    
+    // Usar a URL correta do API
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    
+    // Fazer um fetch GET direto
+    fetch(`${apiUrl}/auth/verify?token=${encodeURIComponent(token)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Erro ao verificar token');
+        }
+        return data;
       })
-      .catch((err) => toast.error(err.message))
+      .then((data) => {
+        if (data.token && data.user) {
+          loginWithToken(data.token, data.user);
+          navigate('/app');
+        } else {
+          navigate('/login', { replace: true });
+        }
+      })
+      .catch((err) => {
+        const message = err.message || '';
+        if (message.includes('Token já utilizado') || message.includes('Token expirado')) {
+          if (getToken()) {
+            navigate('/app', { replace: true });
+          } else {
+            navigate('/login', { replace: true });
+          }
+          return;
+        }
+        console.error('Erro na verificação:', err);
+        toast.error(message || 'Erro ao verificar token');
+      })
       .finally(() => setLoading(false));
-  }, [token, loginWithToken, navigate]);
+  }, [token, attempted, user, navigate]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">

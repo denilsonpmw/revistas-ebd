@@ -1,14 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext.jsx';
+import { apiRequest } from '../api/client.js';
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const roleLabels = {
     USER: 'Usuário',
     MANAGER: 'Gerente',
     ADMIN: 'Administrador'
+  };
+
+  const onSubmitChangePassword = async (data) => {
+    if (data.newPassword !== data.confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+
+    try {
+      const response = await apiRequest('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword
+        })
+      });
+      
+      console.log('Resposta de change-password:', response);
+      toast.success('Senha alterada com sucesso!');
+      setShowChangePassword(false);
+      reset();
+    } catch (err) {
+      console.error('Erro ao alterar senha:', err);
+      // Se for erro de autenticação, mostrar mensagem específica
+      if (err.message.includes('incorreta')) {
+        toast.error('Senha atual incorreta');
+      } else if (err.message.includes('Token')) {
+        toast.error('Sessão expirada. Faça login novamente');
+      } else {
+        toast.error(err.message || 'Erro ao alterar senha');
+      }
+    }
   };
 
   return (
@@ -86,6 +123,13 @@ export default function AppLayout() {
               {user?.name} ({roleLabels[user?.role] || user?.role})
             </div>
             <button
+              onClick={() => setShowChangePassword(true)}
+              className="rounded bg-slate-800 px-3 py-1 text-xs hover:bg-slate-700"
+              title="Alterar Senha"
+            >
+              🔐
+            </button>
+            <button
               onClick={logout}
               className="rounded bg-slate-800 px-3 py-1 text-xs hover:bg-slate-700"
             >
@@ -97,6 +141,85 @@ export default function AppLayout() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Outlet />
       </main>
+
+      {/* Modal de Alterar Senha */}
+      {showChangePassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-slate-100 mb-6">Alterar Senha</h2>
+
+              <form onSubmit={handleSubmit(onSubmitChangePassword)} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Senha Atual</label>
+                  <input
+                    type="password"
+                    {...register('currentPassword', { 
+                      required: 'Senha atual é obrigatória',
+                      minLength: { value: 4, message: 'Mínimo 4 caracteres' }
+                    })}
+                    placeholder="Digite sua senha atual"
+                    className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                  />
+                  {errors.currentPassword && (
+                    <p className="mt-1 text-sm text-red-400">{errors.currentPassword.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Nova Senha</label>
+                  <input
+                    type="password"
+                    {...register('newPassword', { 
+                      required: 'Nova senha é obrigatória',
+                      minLength: { value: 4, message: 'Mínimo 4 caracteres' }
+                    })}
+                    placeholder="Digite sua nova senha"
+                    className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                  />
+                  {errors.newPassword && (
+                    <p className="mt-1 text-sm text-red-400">{errors.newPassword.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Confirmar Nova Senha</label>
+                  <input
+                    type="password"
+                    {...register('confirmPassword', { 
+                      required: 'Confirme a nova senha'
+                    })}
+                    placeholder="Confirme sua nova senha"
+                    className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                  />
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-400">{errors.confirmPassword.message}</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowChangePassword(false);
+                      reset();
+                    }}
+                    className="flex-1 px-4 py-2 bg-slate-800 text-slate-100 rounded-lg hover:bg-slate-700 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
+                  >
+                    Alterar Senha
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

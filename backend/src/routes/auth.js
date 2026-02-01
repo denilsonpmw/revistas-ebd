@@ -1,5 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
+const bcrypt = require('bcryptjs');
 const { prisma } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { signJwt } = require('../utils/token');
@@ -8,25 +9,32 @@ const { authRequired } = require('../middleware/auth');
 const router = express.Router();
 
 const requestSchema = z.object({
-  whatsapp: z.string().min(8)
+  whatsapp: z.string().min(8),
+  password: z.string().min(4)
 });
 
 router.post('/request-link', async (req, res) => {
   const parse = requestSchema.safeParse(req.body);
   if (!parse.success) {
-    return res.status(400).json({ message: 'WhatsApp inválido' });
+    return res.status(400).json({ message: 'WhatsApp e senha são obrigatórios' });
   }
 
   // Normalizar WhatsApp: remover espaços, hífens, parênteses
-  let { whatsapp } = parse.data;
+  let { whatsapp, password } = parse.data;
   whatsapp = whatsapp.replace(/[\s\-\(\)]/g, '');
 
   const user = await prisma.user.findUnique({ where: { whatsapp } });
   if (!user) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+    return res.status(404).json({ message: 'WhatsApp ou senha incorretos' });
   }
   if (!user.active) {
     return res.status(403).json({ message: 'Cadastro pendente de aprovação' });
+  }
+
+  // Validar senha
+  const validPassword = await bcrypt.compare(password, user.password);
+  if (!validPassword) {
+    return res.status(401).json({ message: 'WhatsApp ou senha incorretos' });
   }
 
   const token = uuidv4();
@@ -53,52 +61,98 @@ router.post('/request-link', async (req, res) => {
 
 router.get('/verify', async (req, res) => {
   const token = String(req.query.token || '').trim();
+  
   if (!token) {
+    console.error('Token ausente na requisição /verify');
     return res.status(400).json({ message: 'Token inválido' });
   }
 
-  const authToken = await prisma.authToken.findUnique({ where: { token } });
-  if (!authToken) {
-    return res.status(404).json({ message: 'Token não encontrado' });
-  }
-  if (authToken.used) {
-    return res.status(400).json({ message: 'Token já utilizado' });
-  }
-  if (authToken.expiresAt < new Date()) {
-    return res.status(400).json({ message: 'Token expirado' });
-  }
+  try {
+    const authToken = await prisma.authToken.findUnique({ where: { token } });
+    if (!authToken) {
+      return res.status(404).json({ message: 'Token não encontrado' });
+    }
+    if (authToken.used) {
+      return res.status(400).json({ message: 'Token já utilizado' });
+    }
+    if (authToken.expiresAt < new Date()) {
+      return res.status(400).json({ message: 'Token expirado' });
+    }
 
-  const user = await prisma.user.findUnique({
-    where: { whatsapp: authToken.whatsapp },
-    include: { congregation: true }
-  });
-  if (!user) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+    const user = await prisma.user.findUnique({
+      where: { whatsapp: authToken.whatsapp },
+      include: { congregation: true }
+    });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+    if (!user.active) {
+      return res.status(403).json({ message: 'Cadastro pendente de aprovação' });
+    }
+
+    await prisma.authToken.update({
+      where: { token },
+      data: { used: true }
+    });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() }
+    });
+
+    const jwtToken = signJwt({
+      sub: user.id,
+      role: user.role
+    });
+
+    return res.json({ token: jwtToken, user });
+  } catch (error) {
+    console.error('Erro em /verify:', error);
+    return res.status(500).json({ message: 'Erro ao verificar token' });
   }
-  if (!user.active) {
-    return res.status(403).json({ message: 'Cadastro pendente de aprovação' });
-  }
-
-  await prisma.authToken.update({
-    where: { token },
-    data: { used: true }
-  });
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { lastLogin: new Date() }
-  });
-
-  const jwtToken = signJwt({
-    sub: user.id,
-    role: user.role
-  });
-
-  return res.json({ token: jwtToken, user });
 });
 
 router.get('/me', authRequired, async (req, res) => {
   return res.json({ user: req.user });
+});
+
+// POST alterar senha (usuário logado)
+router.post('/change-password', authRequired, async (req, res) => {
+  const schema = z.object({
+    currentPassword: z.string().min(4),
+    newPassword: z.string().min(4)
+  });
+
+  try {
+    const data = schema.parse(req.body);
+    
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    // Validar senha atual
+    const validPassword = await bcrypt.compare(data.currentPassword, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Senha atual incorreta' });
+    }
+
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+    // Atualizar senha
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+
+    return res.json({ message: 'Senha alterada com sucesso' });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: error.errors[0].message });
+    }
+    return res.status(500).json({ message: error.message });
+  }
 });
 
 // POST registro público (auto-cadastro)
@@ -106,6 +160,7 @@ router.post('/register', async (req, res) => {
   const schema = z.object({
     name: z.string().min(3),
     whatsapp: z.string().min(10),
+    password: z.string().min(4),
     congregationId: z.string()
   });
 
@@ -124,11 +179,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'WhatsApp já cadastrado' });
     }
     
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    
     // Cria usuário com active=false (pendente de aprovação)
     const user = await prisma.user.create({
       data: {
         name: data.name,
         whatsapp: normalizedWhatsapp,
+        password: hashedPassword,
         congregationId: data.congregationId,
         role: 'USER',
         active: false

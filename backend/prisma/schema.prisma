@@ -12,6 +12,7 @@ model User {
   name            String
   whatsapp        String        @unique
   email           String?       @unique
+  password        String
   congregationId  String
   congregation    Congregation  @relation(fields: [congregationId], references: [id], onDelete: Cascade)
   role            Role          @default(USER)

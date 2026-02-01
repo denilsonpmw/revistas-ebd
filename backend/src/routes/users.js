@@ -1,5 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
+const bcrypt = require('bcryptjs');
 const { prisma } = require('../db');
 const { requireRole } = require('../middleware/auth');
 
@@ -126,6 +127,43 @@ router.delete('/:id', async (req, res) => {
   try {
     await prisma.user.delete({ where: { id } });
     return res.json({ message: 'Usuário removido' });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+// PATCH resetar senha de um usuário (admin only)
+router.patch('/:id/reset-password', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    // Gerar nova senha aleatória (12 caracteres)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let tempPassword = '';
+    for (let i = 0; i < 12; i++) {
+      tempPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    // Atualizar senha no banco
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword }
+    });
+
+    console.log(`🔐 Senha resetada para ${user.whatsapp}: ${tempPassword}`);
+
+    return res.json({ 
+      message: 'Senha resetada com sucesso',
+      tempPassword, // Retornar para o admin copiar e enviar
+      whatsapp: user.whatsapp
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

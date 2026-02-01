@@ -7,21 +7,26 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const validateToken = async () => {
     const token = getToken();
     if (!token) {
       setLoading(false);
       return;
     }
-    apiRequest('/auth/me')
-      .then((data) => {
-        setUser(data.user);
-      })
-      .catch(() => {
-        clearToken();
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
+    try {
+      const data = await apiRequest('/auth/me');
+      setUser(data.user);
+    } catch (err) {
+      console.error('Erro ao validar token:', err);
+      clearToken();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    validateToken();
   }, []);
 
   const value = useMemo(
@@ -29,6 +34,7 @@ export function AuthProvider({ children }) {
       user,
       setUser,
       loading,
+      validateToken, // Expor para revalidar quando necessário
       loginWithToken: (token, userData) => {
         setToken(token);
         setUser(userData);
