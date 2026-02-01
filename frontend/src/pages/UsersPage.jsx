@@ -64,7 +64,9 @@ export default function UsersPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      setShowCreateModal(false);
       setEditingUser(null);
+      reset();
       toast.success('Usuário atualizado com sucesso!');
     },
     onError: (error) => {

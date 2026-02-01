@@ -127,7 +127,11 @@ export default function DashboardAdminPage() {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
+                labelStyle={{ color: '#f1f5f9' }}
+                itemStyle={{ color: '#6366f1' }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -136,15 +140,13 @@ export default function DashboardAdminPage() {
           <h3 className="mb-4 text-lg font-semibold">Pedidos por Área</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={areaStats}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
                 labelStyle={{ color: '#f1f5f9' }}
+                itemStyle={{ color: '#6366f1' }}
               />
-              <Legend />
-              <Bar dataKey="pedidos" fill="#10b981" name="Pedidos" />
+              <Bar dataKey="pedidos" fill="#6366f1" name="Pedidos" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -160,11 +162,12 @@ export default function DashboardAdminPage() {
               <XAxis dataKey="name" stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
                 labelStyle={{ color: '#f1f5f9' }}
+                itemStyle={{ color: '#3b82f6' }}
               />
               <Legend />
-              <Bar dataKey="quantidade" fill="#3b82f6" name="Quantidade" />
+              <Bar dataKey="quantidade" fill="#3b82f6" name="Quantidade" background={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

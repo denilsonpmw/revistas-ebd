@@ -272,6 +272,12 @@ export default function OrdersPage() {
 
   const formatDate = (date) => new Date(date).toLocaleDateString('pt-BR');
 
+  // ...existing code...
+  // Buscar pedidos pendentes da congregação do usuário
+  const user = meQuery.data?.user;
+  const orders = ordersQuery.data?.orders || [];
+  const myPendingOrders = orders.filter(o => o.congregationId === user?.congregationId && o.status === 'PENDING');
+
   return (
     <>
       <style>{printStyles}</style>
@@ -364,10 +370,11 @@ export default function OrdersPage() {
 
           <button
             type="submit"
-            disabled={items.length === 0 || createMutation.isPending}
+            disabled={items.length === 0 || createMutation.isPending || myPendingOrders.length > 0}
             className="rounded bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-600 disabled:opacity-50"
+            title={myPendingOrders.length > 0 ? 'Você possui pedido pendente de aprovação. Aguarde antes de enviar um novo pedido.' : ''}
           >
-            {createMutation.isPending ? 'Enviando...' : 'Enviar Pedido'}
+            {createMutation.isPending ? 'Enviando...' : myPendingOrders.length > 0 ? 'Aguardando aprovação do pedido anterior' : 'Enviar Pedido'}
           </button>
         </form>
       </div>

@@ -5,3 +5,8 @@
 :root {
   color-scheme: dark;
 }
+
+/* Remove o fundo cinza/branco que aparece ao redor das barras no hover */
+.recharts-bar-background-rectangle {
+  display: none !important;
+}

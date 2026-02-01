@@ -100,27 +100,26 @@ export default function DashboardPage() {
   // Calcular dias restantes do período
   const daysUntilPeriodEnd = currentPeriod ? Math.ceil((new Date(currentPeriod.endDate) - new Date()) / (1000 * 60 * 60 * 24)) : 0;
 
-  // Dados para gráfico - Últimos 3 meses
-  const last3Months = () => {
-    const months = [];
-    for (let i = 2; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      months.push({
-        name: date.toLocaleString('pt-BR', { month: 'short', year: '2-digit' }),
-        month: date.getMonth(),
-        year: date.getFullYear(),
-        valor: 0
-      });
-    }
-    return months;
+  // Dados para gráfico - Trimestres do ano
+  const getTrimesters = () => {
+    return [
+      { name: 'Trimestre 1', startMonth: 0, endMonth: 2 },   // Jan-Mar
+      { name: 'Trimestre 2', startMonth: 3, endMonth: 5 },   // Abr-Jun
+      { name: 'Trimestre 3', startMonth: 6, endMonth: 8 },   // Jul-Set
+      { name: 'Trimestre 4', startMonth: 9, endMonth: 11 }   // Out-Dez
+    ];
   };
 
-  const monthlyOrders = last3Months().map(month => {
+  const currentYear = new Date().getFullYear();
+  const trimesterOrders = getTrimesters().map((trimester, idx) => {
     const total = myOrders
       .filter(order => {
         const orderDate = new Date(order.createdAt);
-        return orderDate.getMonth() === month.month && orderDate.getFullYear() === month.year;
+        return (
+          orderDate.getFullYear() === currentYear &&
+          orderDate.getMonth() >= trimester.startMonth &&
+          orderDate.getMonth() <= trimester.endMonth
+        );
       })
       .reduce((sum, order) => {
         const orderTotal = (order.items || []).reduce((itemSum, item) => 
@@ -128,8 +127,8 @@ export default function DashboardPage() {
         );
         return sum + orderTotal;
       }, 0);
-    return { ...month, valor: total };
-  });
+    return { name: trimester.name, valor: total };
+  }).filter(t => t.valor > 0);
 
   // Últimos 5 pedidos
   const recentOrders = [...myOrders]
@@ -212,6 +211,8 @@ export default function DashboardPage() {
           <button
             onClick={() => navigate('/app/pedidos')}
             className="rounded-lg border border-blue-800 bg-gradient-to-r from-blue-900/50 to-blue-800/30 p-4 flex items-center gap-3 hover:border-blue-700 transition-colors"
+            disabled={pendingOrders > 0}
+            title={pendingOrders > 0 ? 'Você possui pedido pendente de aprovação. Aguarde antes de criar um novo pedido.' : ''}
           >
             <div className="text-2xl">✏️</div>
             <div className="flex-1 min-w-0 text-left">
@@ -219,7 +220,7 @@ export default function DashboardPage() {
                 Novo Pedido
               </div>
               <div className="text-xs text-blue-300">
-                Criar pedido agora
+                {pendingOrders > 0 ? 'Aguarde aprovação do pedido anterior' : 'Criar pedido agora'}
               </div>
             </div>
           </button>
@@ -322,18 +323,19 @@ export default function DashboardPage() {
 
       {/* Grid de Gráficos */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Gráfico de Pedidos nos Últimos 3 Meses */}
+        {/* Gráfico de Pedidos por Trimestre */}
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-          <h3 className="mb-4 text-lg font-semibold">Últimos 3 Meses</h3>
+          <h3 className="mb-4 text-lg font-semibold">Pedidos por Trimestre ({currentYear})</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={monthlyOrders}>
+            <BarChart data={trimesterOrders}>
               <XAxis dataKey="name" stroke="#94a3b8" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
                 labelStyle={{ color: '#f1f5f9' }}
+                itemStyle={{ color: '#3b82f6' }}
                 formatter={(value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               />
-              <Bar dataKey="valor" fill="#3b82f6" name="Valor Total" label={{ position: 'top', fill: '#94a3b8', formatter: (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }} />
+              <Bar dataKey="valor" fill="#3b82f6" name="Valor Total" label={{ position: 'top', fill: '#94a3b8', formatter: (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }} background={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -351,36 +353,15 @@ export default function DashboardPage() {
               <BarChart data={ordersByMagazine}>
                 <XAxis dataKey="name" stroke="#94a3b8" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
                   labelStyle={{ color: '#f1f5f9' }}
+                  itemStyle={{ color: '#10b981' }}
                 />
-                <Bar dataKey="quantidade" fill="#10b981" name="Quantidade" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} />
+                <Bar dataKey="quantidade" fill="#10b981" name="Quantidade" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
-
-        {/* Gráfico de Pedidos por Área */}
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-          <h3 className="mb-4 text-lg font-semibold">Pedidos por Área</h3>
-          {ordersByArea.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <div className="text-4xl mb-2">📊</div>
-              <p>Nenhum dado disponível</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={ordersByArea}>
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
-                  labelStyle={{ color: '#f1f5f9' }}
-                />
-                <Bar dataKey="quantidade" fill="#6366f1" name="Pedidos" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+        </div>        
       </div>
 
       {/* Grid de Gráfico e Últimos Pedidos */}
@@ -500,13 +481,25 @@ export default function DashboardPage() {
         {recentOrders.length > 0 && (
           <button
             onClick={() => duplicateOrderMutation.mutate(recentOrders[0])}
-            disabled={duplicateOrderMutation.isPending || !currentPeriod}
+            disabled={duplicateOrderMutation.isPending || !currentPeriod || pendingOrders > 0}
             className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-left hover:border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={!currentPeriod ? 'Nenhum período aberto' : 'Duplicar o último pedido'}
+            title={
+              !currentPeriod
+                ? 'Nenhum período aberto'
+                : pendingOrders > 0
+                  ? 'Você possui pedido pendente de aprovação. Aguarde antes de duplicar um pedido.'
+                  : 'Duplicar o último pedido'
+            }
           >
             <div className="text-3xl mb-3">📋</div>
             <div className="font-semibold mb-1">Duplicar Pedido</div>
-            <div className="text-sm text-slate-400">{duplicateOrderMutation.isPending ? 'Duplicando...' : 'Repetir último pedido'}</div>
+            <div className="text-sm text-slate-400">{
+              duplicateOrderMutation.isPending
+                ? 'Duplicando...'
+                : pendingOrders > 0
+                  ? 'Aguarde aprovação do pedido anterior'
+                  : 'Repetir último pedido'
+            }</div>
           </button>
         )}
         
