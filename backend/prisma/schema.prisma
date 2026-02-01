@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String        @id @default(cuid())
+  name            String
+  whatsapp        String        @unique
+  email           String?       @unique
+  congregationId  String
+  congregation    Congregation  @relation(fields: [congregationId], references: [id], onDelete: Cascade)
+  role            Role          @default(USER)
+  active          Boolean       @default(false)
+  lastLogin       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  ordersSubmitted Order[]       @relation("SubmittedOrders")
+  ordersApproved  Order[]       @relation("ApprovedOrders")
+  authTokens      AuthToken[]
+}
+
+model Congregation {
+  id             String       @id @default(cuid())
+  name           String
+  code           String       @unique
+  isHeadquarters Boolean      @default(false)
+  areaId         String?
+  area           Area?        @relation(fields: [areaId], references: [id])
+  address        String?
+  city           String?
+  contactName    String?
+  users          User[]
+  orders         Order[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Area {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  congregations Congregation[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Magazine {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  className   String
+  ageRange    String
+  unitPrice   Decimal
+  active      Boolean  @default(true)
+  orderItems  OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Period {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  active      Boolean  @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model Order {
+  id             String        @id @default(cuid())
+  number         Int           @default(autoincrement())
+  congregationId String
+  congregation   Congregation  @relation(fields: [congregationId], references: [id])
+  submittedById  String
+  submittedBy    User          @relation("SubmittedOrders", fields: [submittedById], references: [id])
+  periodId       String
+  period         Period        @relation(fields: [periodId], references: [id])
+  items          OrderItem[]
+  observations   String?
+  status         OrderStatus   @default(PENDING)
+  approvedById   String?
+  approvedBy     User?         @relation("ApprovedOrders", fields: [approvedById], references: [id])
+  approvedAt     DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  magazineId String
+  magazine   Magazine @relation(fields: [magazineId], references: [id])
+  quantity   Int
+  unitPrice  Decimal
+  totalValue Decimal
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  APPROVED
+  DELIVERED
+  CANCELED
+}
+
+model AuthToken {
+  id        String   @id @default(cuid())
+  whatsapp  String
+  token     String   @unique
+  expiresAt DateTime
+  ip        String?
+  used      Boolean  @default(false)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
