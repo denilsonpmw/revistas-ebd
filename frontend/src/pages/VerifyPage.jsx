@@ -31,8 +31,8 @@ export default function VerifyPage() {
     setAttempted(true);
     setLoading(true);
     
-    // Usar a URL correta do API
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    // Usar a URL correta do API (URL relativa em produção, localhost em dev)
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '');
     
     // Fazer um fetch GET direto
     fetch(`${apiUrl}/auth/verify?token=${encodeURIComponent(token)}`, {
