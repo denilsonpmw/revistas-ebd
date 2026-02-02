@@ -3,14 +3,14 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copiar package.json files
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
+# Copiar todo o projeto
+COPY . .
 
-# Instalar dependências
+# Build do frontend
 RUN cd frontend && npm install --legacy-peer-deps && npm run build
 
-RUN cd ../backend && npm install
+# Instalar dependências do backend
+RUN cd backend && npm install
 
 # Gerar Prisma Client
 RUN cd backend && npx prisma generate
