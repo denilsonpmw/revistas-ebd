@@ -27,8 +27,8 @@ RUN apk add --no-cache openssl
 COPY --from=builder /app/backend/node_modules ./backend/node_modules
 COPY --from=builder /app/frontend/dist ./frontend/dist
 
-# Copiar source code
-COPY backend ./backend
+# Copiar source code do backend (incluindo prisma/)
+COPY --from=builder /app/backend ./backend
 
 # Definir working directory
 WORKDIR /app/backend
