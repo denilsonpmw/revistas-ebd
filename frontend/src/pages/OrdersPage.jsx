@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
+import { VariantSelector, getPriceForCombination } from '../components/VariantSelector';
 
 const statusPT = {
   PENDING: 'Pendente',
@@ -92,10 +93,14 @@ const printStyles = `
 export default function OrdersPage() {
   const { register, handleSubmit, reset } = useForm();
   const [items, setItems] = useState([]);
+  const [selectedCombinationId, setSelectedCombinationId] = useState(null);
+  const [currentUnitPrice, setCurrentUnitPrice] = useState(0);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [editItems, setEditItems] = useState([]);
+  const [editSelectedCombinationId, setEditSelectedCombinationId] = useState(null);
+  const [editCurrentUnitPrice, setEditCurrentUnitPrice] = useState(0);
   const queryClient = useQueryClient();
 
   const meQuery = useQuery({
@@ -180,10 +185,16 @@ export default function OrdersPage() {
         orderDetailQuery.data.order.items.map(item => {
           // Buscar a revista atualizada da lista de revistas para ter o unitPrice correto
           const currentMagazine = magazinesQuery.data.magazines.find(m => m.id === item.magazineId);
+          const combinationName = item.variantData?.combinationName || item.combinationName;
+          const combinationId = item.variantData?.combinationId || item.combinationId;
           return {
             magazineId: item.magazineId,
             quantity: item.quantity,
-            magazine: currentMagazine || item.magazine // Usar a revista atualizada se encontrada
+            magazine: currentMagazine || item.magazine, // Usar a revista atualizada se encontrada
+            combinationId,
+            combinationName,
+            unitPrice: Number(item.unitPrice || 0),
+            totalValue: Number(item.totalValue || 0)
           };
         })
       );
@@ -227,34 +238,53 @@ export default function OrdersPage() {
       return;
     }
 
+    if (!selectedCombinationId) {
+      toast.error('Selecione uma variação');
+      return;
+    }
+
     const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
     if (!magazine) {
       toast.error('Revista não encontrada');
       return;
     }
 
-    if (items.some(item => item.magazineId === magazineId)) {
-      toast.error('Esta revista já foi adicionada');
+    // Verificar se revista com mesma combinação já foi adicionada
+    if (items.some(item => item.magazineId === magazineId && item.combinationId === selectedCombinationId)) {
+      toast.error('Esta variação já foi adicionada');
       return;
     }
 
-    const totalValue = Number((quantity * Number(magazine.unitPrice)).toFixed(2));
+    // Obter combinação selecionada
+    const combination = magazine.variantCombinations?.find(c => c.id === selectedCombinationId);
+    if (!combination) {
+      toast.error('Combinação não encontrada');
+      return;
+    }
+
+    const unitPrice = Number(combination.price);
+    const totalValue = Number((quantity * unitPrice).toFixed(2));
 
     setItems([...items, {
       magazineId,
+      combinationId: selectedCombinationId,
+      combinationName: combination.name,
       quantity,
       magazine: {
         id: magazine.id,
         name: magazine.name,
         className: magazine.className,
-        ageRange: magazine.ageRange,
-        unitPrice: magazine.unitPrice
+        ageRange: magazine.ageRange
       },
+      unitPrice,
       totalValue
     }]);
 
+    // Limpar campos
     document.querySelector('[name="magazineId"]').value = '';
     document.querySelector('[name="quantity"]').value = '1';
+    setSelectedCombinationId(null);
+    setCurrentUnitPrice(0);
   };
 
   const removeItem = (index) => {
@@ -305,14 +335,34 @@ export default function OrdersPage() {
               <select
                 name="magazineId"
                 className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm w-full"
+                onChange={(e) => {
+                  // Resetar variante quando mudar revista
+                  setSelectedCombinationId(null);
+                  setCurrentUnitPrice(0);
+                }}
               >
                 <option value="">Selecione revista...</option>
                 {magazinesQuery.data?.magazines?.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.name} - {m.className} (R$ {formatCurrency(m.unitPrice)})
+                    {m.name} - {m.className}
                   </option>
                 ))}
               </select>
+
+              {/* Mostrar seletor de variações se a revista tiver variantes */}
+              {(() => {
+                const magazineId = document.querySelector('[name="magazineId"]')?.value;
+                const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+                return magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0 ? (
+                  <VariantSelector
+                    magazine={magazine}
+                    selectedCombinationId={selectedCombinationId}
+                    onCombinationChange={(combId) => setSelectedCombinationId(combId)}
+                    onPriceUpdate={(price) => setCurrentUnitPrice(price)}
+                  />
+                ) : null;
+              })()}
+
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -336,17 +386,20 @@ export default function OrdersPage() {
               <div className="space-y-2 bg-slate-950 p-2 rounded">
                 <p className="text-xs text-slate-400 font-semibold">Itens adicionados:</p>
                 {items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded">
+                  <div key={idx} className="flex justify-between items-start text-xs bg-slate-900 p-2 rounded gap-2">
                     <div className="flex-1">
                       <p className="text-slate-100">{item.magazine.name}</p>
-                      <p className="text-slate-400">
-                        {item.quantity}x R$ {formatCurrency(item.magazine.unitPrice)} = R$ {formatCurrency(item.totalValue)}
+                      <p className="text-slate-400 mt-1">
+                        Variação: <span className="font-semibold">{item.combinationName}</span>
+                      </p>
+                      <p className="text-slate-400 mt-1">
+                        {item.quantity}x R$ {formatCurrency(item.unitPrice)} = R$ {formatCurrency(item.totalValue)}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeItem(idx)}
-                      className="text-red-400 hover:text-red-300 font-bold ml-2"
+                      className="text-red-400 hover:text-red-300 font-bold flex-shrink-0"
                     >
                       ✕
                     </button>
@@ -493,11 +546,12 @@ export default function OrdersPage() {
                   {orderDetailQuery.data.order.items?.map((item, idx) => (
                     <div key={idx} className="bg-slate-900 p-2 rounded text-xs">
                       <div className="flex justify-between">
-                        <span className="font-semibold">{item.magazine.name}</span>
+                        <span className="font-semibold">
+                          {item.variantData?.combinationName || item.combinationName
+                            ? `${item.magazine.name} - ${item.variantData?.combinationName || item.combinationName}`
+                            : item.magazine.name}
+                        </span>
                         <span>{item.quantity}x</span>
-                      </div>
-                      <div className="text-slate-400">
-                        {item.magazine.className} • {item.magazine.ageRange}
                       </div>
                       <div className="flex justify-between text-slate-300 mt-1">
                         <span>R$ {formatCurrency(item.unitPrice)} cada</span>
@@ -600,14 +654,30 @@ export default function OrdersPage() {
                   <select
                     name="editMagazineId"
                     className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm w-full"
+                    onChange={() => {
+                      setEditSelectedCombinationId(null);
+                      setEditCurrentUnitPrice(0);
+                    }}
                   >
                     <option value="">Selecione revista...</option>
                     {magazinesQuery.data?.magazines?.map((m) => (
                       <option key={m.id} value={m.id}>
-                        {m.name} - {m.className} (R$ {formatCurrency(m.unitPrice)})
+                        {m.name} - {m.className}
                       </option>
                     ))}
                   </select>
+                  {(() => {
+                    const magazineId = document.querySelector('[name="editMagazineId"]')?.value;
+                    const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+                    return magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0 ? (
+                      <VariantSelector
+                        magazine={magazine}
+                        selectedCombinationId={editSelectedCombinationId}
+                        onCombinationChange={(combId) => setEditSelectedCombinationId(combId)}
+                        onPriceUpdate={(price) => setEditCurrentUnitPrice(price)}
+                      />
+                    ) : null;
+                  })()}
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -628,20 +698,45 @@ export default function OrdersPage() {
                           return;
                         }
 
-                        if (editItems.some(item => item.magazineId === magazineId)) {
+                        if (!editSelectedCombinationId) {
+                          toast.error('Selecione uma variação');
+                          return;
+                        }
+
+                        if (editItems.some(item => item.magazineId === magazineId && item.combinationId === editSelectedCombinationId)) {
                           toast.error('Esta revista já foi adicionada');
                           return;
                         }
 
                         const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+                        if (!magazine) {
+                          toast.error('Revista não encontrada');
+                          return;
+                        }
+
+                        const combination = magazine.variantCombinations?.find(c => c.id === editSelectedCombinationId);
+                        if (!combination) {
+                          toast.error('Combinação não encontrada');
+                          return;
+                        }
+
+                        const unitPrice = Number(combination.price);
+                        const totalValue = Number((quantity * unitPrice).toFixed(2));
+
                         setEditItems([...editItems, {
                           magazineId,
                           quantity,
-                          magazine
+                          magazine,
+                          combinationId: editSelectedCombinationId,
+                          combinationName: combination.name,
+                          unitPrice,
+                          totalValue
                         }]);
 
                         document.querySelector('[name="editMagazineId"]').value = '';
                         document.querySelector('[name="editQuantity"]').value = '1';
+                        setEditSelectedCombinationId(null);
+                        setEditCurrentUnitPrice(0);
                       }}
                       className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     >
@@ -657,8 +752,13 @@ export default function OrdersPage() {
                       <div key={idx} className="flex justify-between items-center text-sm bg-slate-900 p-3 rounded border border-slate-800">
                         <div className="flex-1">
                           <p className="text-slate-100 font-medium">{item.magazine.name}</p>
+                          {item.combinationName && (
+                            <p className="text-xs text-slate-400 mt-1">
+                              Variação: <span className="font-semibold">{item.combinationName}</span>
+                            </p>
+                          )}
                           <p className="text-xs text-slate-400 mt-1">
-                            {item.quantity}x R$ {formatCurrency(item.magazine.unitPrice)} = <span className="font-semibold text-emerald-400">R$ {formatCurrency(item.quantity * Number(item.magazine.unitPrice))}</span>
+                            {item.quantity}x R$ {formatCurrency(item.unitPrice)} = <span className="font-semibold text-emerald-400">R$ {formatCurrency(item.totalValue)}</span>
                           </p>
                         </div>
                         <button
@@ -674,7 +774,7 @@ export default function OrdersPage() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-400">Total:</span>
                         <span className="text-lg font-bold text-emerald-400">
-                          R$ {formatCurrency(editItems.reduce((sum, item) => sum + (item.quantity * Number(item.magazine.unitPrice)), 0))}
+                          R$ {formatCurrency(editItems.reduce((sum, item) => sum + Number(item.totalValue || 0), 0))}
                         </span>
                       </div>
                     </div>
@@ -700,11 +800,16 @@ export default function OrdersPage() {
                       toast.error('Adicione pelo menos uma revista');
                       return;
                     }
+                    if (editItems.some(item => !item.combinationId)) {
+                      toast.error('Selecione a variação de todos os itens');
+                      return;
+                    }
                     editMutation.mutate({
                       orderId: selectedOrderId,
                       payload: {
                         items: editItems.map(item => ({
                           magazineId: item.magazineId,
+                          combinationId: item.combinationId,
                           quantity: item.quantity
                         }))
                       }

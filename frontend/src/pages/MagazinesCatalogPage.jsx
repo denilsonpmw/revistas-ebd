@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
+import { VariantDisplay } from '../components/VariantSelector';
 
 const printStyles = `
   @media print {
@@ -198,6 +199,7 @@ export default function MagazinesCatalogPage() {
                   <th className="p-3 text-left font-bold">Classe</th>
                   <th className="p-3 text-left font-bold">Faixa Etária</th>
                   <th className="p-3 text-right font-bold">Preço Unit.</th>
+                  <th className="p-3 text-left font-bold">Variações</th>
                   <th className="p-3 text-center font-bold">Status</th>
                 </tr>
               </thead>
@@ -217,6 +219,19 @@ export default function MagazinesCatalogPage() {
                           maximumFractionDigits: 2 
                         })}
                       </span>
+                    </td>
+                    <td className="p-3">
+                      {mag.variantCombinations && mag.variantCombinations.length > 0 ? (
+                        <div className="text-xs text-slate-700">
+                          {mag.variantCombinations.map((combo) => (
+                            <div key={combo.id}>
+                              {combo.name}: R$ {Number(combo.price).toFixed(2)}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-500">Sem variações</span>
+                      )}
                     </td>
                     <td className="p-3 text-center">
                       {mag.active ? (

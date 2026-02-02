@@ -12,6 +12,7 @@ const createSchema = z.object({
   items: z.array(
     z.object({
       magazineId: z.string().min(1),
+      combinationId: z.string().min(1),
       quantity: z.number().int().min(1)
     })
   ).min(1, 'Pelo menos um item é obrigatório'),
@@ -42,14 +43,24 @@ router.post('/', requireRole(['USER', 'MANAGER', 'ADMIN']), async (req, res) => 
       return res.status(404).json({ message: `Revista ${item.magazineId} não encontrada` });
     }
 
-    const itemTotal = Number((item.quantity * Number(magazine.unitPrice)).toFixed(2));
+    const combination = await prisma.magazineVariantCombination.findUnique({ where: { id: item.combinationId } });
+    if (!combination || combination.magazineId !== magazine.id || !combination.active) {
+      return res.status(404).json({ message: 'Combinação de variação não encontrada' });
+    }
+
+    const unitPrice = new Prisma.Decimal(combination.price);
+    const itemTotal = Number((item.quantity * Number(unitPrice)).toFixed(2));
     totalOrderValue += itemTotal;
 
     processedItems.push({
       magazineId: item.magazineId,
       quantity: item.quantity,
-      unitPrice: magazine.unitPrice,
-      totalValue: new Prisma.Decimal(itemTotal)
+      unitPrice,
+      totalValue: new Prisma.Decimal(itemTotal),
+      variantData: {
+        combinationId: combination.id,
+        combinationName: combination.name
+      }
     });
   }
 
@@ -195,6 +206,7 @@ const updateSchema = z.object({
   items: z.array(
     z.object({
       magazineId: z.string().min(1),
+      combinationId: z.string().min(1),
       quantity: z.number().int().min(1)
     })
   ).min(1, 'Pelo menos um item é obrigatório'),
@@ -238,12 +250,22 @@ router.patch('/:id', requireRole(['USER', 'MANAGER', 'ADMIN']), async (req, res)
       return res.status(404).json({ message: `Revista ${item.magazineId} não encontrada` });
     }
 
-    const itemTotal = Number((item.quantity * Number(magazine.unitPrice)).toFixed(2));
+    const combination = await prisma.magazineVariantCombination.findUnique({ where: { id: item.combinationId } });
+    if (!combination || combination.magazineId !== magazine.id || !combination.active) {
+      return res.status(404).json({ message: 'Combinação de variação não encontrada' });
+    }
+
+    const unitPrice = new Prisma.Decimal(combination.price);
+    const itemTotal = Number((item.quantity * Number(unitPrice)).toFixed(2));
     processedItems.push({
       magazineId: item.magazineId,
       quantity: item.quantity,
-      unitPrice: magazine.unitPrice,
-      totalValue: new Prisma.Decimal(itemTotal)
+      unitPrice,
+      totalValue: new Prisma.Decimal(itemTotal),
+      variantData: {
+        combinationId: combination.id,
+        combinationName: combination.name
+      }
     });
   }
 

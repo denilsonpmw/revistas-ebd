@@ -59,16 +59,12 @@ export default function MagazinesPage() {
   });
 
   const onSubmit = (values) => {
-    const unitPrice = typeof values.unitPrice === 'string' 
-      ? parseFloat(values.unitPrice.replace(/[^\d,]/g, '').replace(',', '.'))
-      : Number(values.unitPrice);
-    
     createMutation.mutate({
       code: values.code.trim(),
       name: values.name.trim(),
       className: values.className.trim(),
       ageRange: values.ageRange.trim(),
-      unitPrice
+      unitPrice: 0
     });
   };
 
@@ -112,20 +108,6 @@ export default function MagazinesPage() {
               placeholder="Ex: 1-2, 3-4, 5-7"
               className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
             />
-            <label className="text-xs text-slate-400">Preço Unitário (R$)</label>
-            <input
-              type="text"
-              inputMode="decimal"
-              {...register('unitPrice', { 
-                required: 'Preço é obrigatório',
-                validate: (val) => {
-                  const num = parseFloat((val || '').toString().replace(/[^\d,]/g, '').replace(',', '.'));
-                  return !isNaN(num) && num > 0 ? true : 'Preço deve ser maior que 0';
-                }
-              })}
-              placeholder="Ex: 8,50"
-              className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
-            />
             <button className="rounded bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900">
               Cadastrar
             </button>
@@ -144,7 +126,6 @@ export default function MagazinesPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Nome</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Classe</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Faixa Etária</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Preço</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Ações</th>
                 </tr>
@@ -187,20 +168,6 @@ export default function MagazinesPage() {
                         mag.ageRange
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
-                      {editingId === mag.id ? (
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={editData.unitPrice !== undefined ? editData.unitPrice : Number(mag.unitPrice).toFixed(2)}
-                          onChange={(e) => setEditData({ ...editData, unitPrice: e.target.value })}
-                          placeholder="Ex: 8,50"
-                          className="w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
-                        />
-                      ) : (
-                        <span className="font-medium">R$ {Number(mag.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      )}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         mag.active ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'
@@ -213,13 +180,9 @@ export default function MagazinesPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
-                              const unitPrice = typeof editData.unitPrice === 'string' 
-                                ? parseFloat(editData.unitPrice.replace(/[^\d,]/g, '').replace(',', '.'))
-                                : Number(editData.unitPrice);
                               editMutation.mutate({ 
                                 id: mag.id, 
-                                ...editData,
-                                unitPrice
+                                ...editData
                               });
                             }}
                             className="text-emerald-400 hover:text-emerald-300"
@@ -244,8 +207,7 @@ export default function MagazinesPage() {
                               setEditData({ 
                                 name: mag.name, 
                                 className: mag.className, 
-                                ageRange: mag.ageRange, 
-                                unitPrice: Number(mag.unitPrice).toFixed(2)
+                                ageRange: mag.ageRange
                               });
                             }}
                             className="text-blue-400 hover:text-blue-300"

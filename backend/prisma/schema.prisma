@@ -51,17 +51,55 @@ model Area {
 }
 
 model Magazine {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
-  className   String
-  ageRange    String
-  unitPrice   Decimal
-  active      Boolean  @default(true)
-  orderItems  OrderItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                    String                       @id @default(cuid())
+  code                  String                       @unique
+  name                  String
+  className             String
+  ageRange              String
+  unitPrice             Decimal
+  active                Boolean                      @default(true)
+  orderItems            OrderItem[]
+  variantTypes          MagazineVariantType[]
+  variantCombinations   MagazineVariantCombination[]
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
 }
+
+model MagazineVariantType {
+  id          String                   @id @default(cuid())
+  magazineId  String
+  magazine    Magazine                 @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  name        String                   // Ex: "Tipo de Usuário", "Tipo de Capa"
+  position    Int                      @default(0)
+  required    Boolean                  @default(true)
+  options     MagazineVariantOption[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+}
+
+model MagazineVariantOption {
+  id              String              @id @default(cuid())
+  variantTypeId   String
+  variantType     MagazineVariantType @relation(fields: [variantTypeId], references: [id], onDelete: Cascade)
+  name            String              // Ex: "Aluno", "Professor", "Capa Dura"
+  position        Int                 @default(0)
+  active          Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+model MagazineVariantCombination {
+  id              String   @id @default(cuid())
+  magazineId      String
+  magazine        Magazine @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  name            String   // Ex: "Aluno - Letra Grande" (para exibição)
+  variantData     Json     // Armazena seleções: { "tipo-id": "option-id", ... }
+  price           Decimal  // Preço específico desta combinação
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 
 model Period {
   id          String   @id @default(cuid())
@@ -102,16 +140,17 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(cuid())
-  orderId    String
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  magazineId String
-  magazine   Magazine @relation(fields: [magazineId], references: [id])
-  quantity   Int
-  unitPrice  Decimal
-  totalValue Decimal
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  magazineId      String
+  magazine        Magazine @relation(fields: [magazineId], references: [id])
+  quantity        Int
+  unitPrice       Decimal  // Preço unitário pago (já com a combinação)
+  totalValue      Decimal
+  variantData     Json?    // Armazena as variações selecionadas: { "tipo-id": "option-id", ... }
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 enum OrderStatus {

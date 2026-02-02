@@ -9,6 +9,7 @@ import DashboardAdminPage from './pages/DashboardAdminPage.jsx';
 import OrdersPage from './pages/OrdersPage.jsx';
 import ReportsPage from './pages/ReportsPage.jsx';
 import MagazinesPage from './pages/MagazinesPage.jsx';
+import MagazineVariantsPage from './pages/MagazineVariantsPage.jsx';
 import MagazinesCatalogPage from './pages/MagazinesCatalogPage.jsx';
 import PeriodsPage from './pages/PeriodsPage.jsx';
 import UsersPage from './pages/UsersPage.jsx';
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="relatorios" element={<ReportsPage />} />
           <Route path="revistas" element={<MagazinesCatalogPage />} />
           <Route path="revistas-admin" element={<AdminRoute><MagazinesPage /></AdminRoute>} />
+          <Route path="revistas-variacoes" element={<AdminRoute><MagazineVariantsPage /></AdminRoute>} />
           <Route path="periodos" element={<AdminRoute><PeriodsPage /></AdminRoute>} />
           <Route path="usuarios" element={<AdminRoute><UsersPage /></AdminRoute>} />
         </Route>

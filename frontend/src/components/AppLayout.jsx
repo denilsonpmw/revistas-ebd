@@ -100,6 +100,14 @@ export default function AppLayout() {
                   Gerenciar Revistas
                 </NavLink>
                 <NavLink
+                  to="/app/revistas-variacoes"
+                  className={({ isActive }) =>
+                    isActive ? 'text-emerald-400' : 'text-slate-300'
+                  }
+                >
+                  Variações de Revistas
+                </NavLink>
+                <NavLink
                   to="/app/periodos"
                   className={({ isActive }) =>
                     isActive ? 'text-emerald-400' : 'text-slate-300'

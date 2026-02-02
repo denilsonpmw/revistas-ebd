@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/admin');
 const magazinesRoutes = require('./routes/magazines');
 const periodsRoutes = require('./routes/periods');
 const usersRoutes = require('./routes/users');
+const variantsRoutes = require('./routes/variants');
 const { authRequired } = require('./middleware/auth');
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/auth', authRoutes);
 app.use('/orders', authRequired, ordersRoutes);
 app.use('/admin', authRequired, adminRoutes);
 app.use('/magazines', authRequired, magazinesRoutes);
+app.use('/variants', authRequired, variantsRoutes);
 app.use('/periods', authRequired, periodsRoutes);
 app.use('/users', authRequired, usersRoutes);
 

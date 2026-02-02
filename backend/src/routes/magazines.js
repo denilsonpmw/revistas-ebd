@@ -73,13 +73,38 @@ router.get('/', async (req, res) => {
   const activeOnly = req.query.active === 'true';
   const magazines = await prisma.magazine.findMany({
     where: activeOnly ? { active: true } : undefined,
+    include: {
+      variantTypes: {
+        include: {
+          options: {
+            where: { active: true },
+            orderBy: { position: 'asc' }
+          }
+        },
+        orderBy: { position: 'asc' }
+      },
+      variantCombinations: {
+        where: { active: true },
+        orderBy: { name: 'asc' }
+      }
+    },
     orderBy: { name: 'asc' }
   });
   
   // Converter Decimal para número para evitar problemas no frontend
   const serializedMagazines = magazines.map(m => ({
     ...m,
-    unitPrice: Number(m.unitPrice)
+    unitPrice: Number(m.unitPrice),
+    variantTypes: m.variantTypes.map(vt => ({
+      ...vt,
+      options: vt.options.map(opt => ({
+        ...opt
+      }))
+    })),
+    variantCombinations: m.variantCombinations.map(vc => ({
+      ...vc,
+      price: Number(vc.price)
+    }))
   }));
   
   // Debug: verificar primeiro item
