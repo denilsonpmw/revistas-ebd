@@ -72,7 +72,7 @@ export default function LoginPage() {
         </form>
         <div className="text-center mt-4">
           <Link
-            to="/registr"
+            to="/registro"
             className="text-sm text-slate-400 hover:text-slate-200 underline"
           >
             Não tem conta? Criar cadastro

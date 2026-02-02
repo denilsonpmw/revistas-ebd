@@ -133,27 +133,27 @@ export default function MagazinesPage() {
         </div>
       )}
 
-      <div className="rounded border border-slate-800 bg-slate-900 p-4">
-        {magazinesQuery.isLoading && <p className="text-sm">Carregando...</p>}
+      <div className="rounded border border-slate-800 bg-slate-900 overflow-hidden">
+        {magazinesQuery.isLoading && <p className="text-sm p-4">Carregando...</p>}
         {magazinesQuery.data?.magazines?.length ? (
-          <div className="overflow-auto">
-            <table className="min-w-full text-sm">
-              <thead className="border-b border-slate-800">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-800">
+              <thead className="bg-slate-950">
                 <tr>
-                  <th className="p-2 text-left">Código</th>
-                  <th className="p-2 text-left">Nome</th>
-                  <th className="p-2 text-left">Classe</th>
-                  <th className="p-2 text-left">Faixa Etária</th>
-                  <th className="p-2 text-left">Preço</th>
-                  <th className="p-2 text-left">Status</th>
-                  <th className="p-2 text-left">Ações</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Código</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Nome</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Classe</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Faixa Etária</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Preço</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Ações</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-slate-900 divide-y divide-slate-800">
                 {magazinesQuery.data.magazines.map((mag) => (
-                  <tr key={mag.id} className="border-t border-slate-800">
-                    <td className="p-2 text-sm">{mag.code}</td>
-                    <td className="p-2 text-sm">
+                  <tr key={mag.id} className="hover:bg-slate-800/50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-100">{mag.code}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
                       {editingId === mag.id ? (
                         <input
                           value={editData.name || mag.name}
@@ -164,7 +164,7 @@ export default function MagazinesPage() {
                         mag.name
                       )}
                     </td>
-                    <td className="p-2 text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
                       {editingId === mag.id ? (
                         <input
                           value={editData.className || mag.className}
@@ -175,7 +175,7 @@ export default function MagazinesPage() {
                         mag.className
                       )}
                     </td>
-                    <td className="p-2 text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
                       {editingId === mag.id ? (
                         <input
                           value={editData.ageRange || mag.ageRange}
@@ -187,7 +187,7 @@ export default function MagazinesPage() {
                         mag.ageRange
                       )}
                     </td>
-                    <td className="p-2 text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
                       {editingId === mag.id ? (
                         <input
                           type="text"
@@ -201,10 +201,16 @@ export default function MagazinesPage() {
                         <span className="font-medium">R$ {Number(mag.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       )}
                     </td>
-                    <td className="p-2">{mag.active ? 'Ativa' : 'Inativa'}</td>
-                    <td className="p-2 text-xs">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        mag.active ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'
+                      }`}>
+                        {mag.active ? 'Ativa' : 'Inativa'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       {editingId === mag.id ? (
-                        <div className="flex gap-1">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
                               const unitPrice = typeof editData.unitPrice === 'string' 
@@ -216,7 +222,7 @@ export default function MagazinesPage() {
                                 unitPrice
                               });
                             }}
-                            className="text-emerald-400 hover:underline"
+                            className="text-emerald-400 hover:text-emerald-300"
                           >
                             Salvar
                           </button>
@@ -225,13 +231,13 @@ export default function MagazinesPage() {
                               setEditingId(null);
                               setEditData({});
                             }}
-                            className="text-slate-400 hover:underline"
+                            className="text-slate-400 hover:text-slate-300"
                           >
                             Cancelar
                           </button>
                         </div>
                       ) : (
-                        <div className="flex gap-1">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
                               setEditingId(mag.id);
@@ -242,23 +248,29 @@ export default function MagazinesPage() {
                                 unitPrice: Number(mag.unitPrice).toFixed(2)
                               });
                             }}
-                            className="text-blue-400 hover:underline"
+                            className="text-blue-400 hover:text-blue-300"
                           >
-                            Editar
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                           {mag.active ? (
                             <button
                               onClick={() => deleteMutation.mutate(mag.id)}
-                              className="text-red-400 hover:underline"
+                              className="text-red-400 hover:text-red-300"
                             >
-                              Desativar
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
                             </button>
                           ) : (
                             <button
                               onClick={() => editMutation.mutate({ id: mag.id, active: true })}
-                              className="text-emerald-400 hover:underline"
+                              className="text-emerald-400 hover:text-emerald-300"
                             >
-                              Reativar
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
                             </button>
                           )}
                         </div>

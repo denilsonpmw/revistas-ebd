@@ -88,26 +88,27 @@ export default function MagazinesCatalogPage() {
   return (
     <>
       <style>{printStyles}</style>
-      <div className="flex flex-col gap-6">
-        {/* Cabeçalho e Filtros - Não imprime */}
-        <div className="no-print">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Catálogo de Revistas</h2>
-            <div className="flex gap-3">
-              <button
-                onClick={handlePrint}
-                className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-              >
-                🖨️ Imprimir
-              </button>
-              <button
-                onClick={handlePDF}
-                className="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-              >
-                📄 Salvar PDF
-              </button>
+      <div className="min-h-screen bg-slate-950 text-slate-100">
+        <div className="flex flex-col gap-6 p-6">
+          {/* Cabeçalho e Filtros - Não imprime */}
+          <div className="no-print">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Catálogo de Revistas</h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={handlePrint}
+                  className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  🖨️ Imprimir
+                </button>
+                <button
+                  onClick={handlePDF}
+                  className="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                >
+                  📄 Salvar PDF
+                </button>
+              </div>
             </div>
-          </div>
 
           <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 mb-6">
             <div className="flex items-center gap-4">
@@ -157,6 +158,7 @@ export default function MagazinesCatalogPage() {
               <div className="text-sm text-slate-400">Revistas Ativas</div>
               <div className="mt-2 text-3xl font-bold text-blue-400">{totalAtivas}</div>
             </div>
+          </div>
           </div>
         </div>
 
