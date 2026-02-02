@@ -1,0 +1,44 @@
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('🔐 Atualizando senhas de usuários...');
+
+  // Senha padrão para todos os usuários que não têm senha
+  const defaultPassword = process.env.DEFAULT_PASSWORD || 'senha123';
+  const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+  // Buscar todos os usuários sem senha ou com senha NULL
+  const users = await prisma.user.findMany({
+    where: {
+      OR: [
+        { password: null },
+        { password: '' }
+      ]
+    }
+  });
+
+  console.log(`📋 Encontrados ${users.length} usuários sem senha`);
+
+  for (const user of users) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+    console.log(`✅ Senha atualizada para usuário: ${user.name} (${user.whatsapp})`);
+  }
+
+  console.log(`\n✨ Concluído! Senha padrão definida: ${defaultPassword}`);
+  console.log('⚠️  Oriente os usuários a alterarem suas senhas após o primeiro acesso.');
+}
+
+main()
+  .catch((e) => {
+    console.error('❌ Erro ao atualizar senhas:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
