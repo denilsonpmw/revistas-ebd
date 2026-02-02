@@ -19,7 +19,6 @@ Monorepo com backend (Express + Prisma) e frontend (React + Vite).
 - Perfil: ADMIN
 
 ## Fluxo de autenticação
-1. Digite o WhatsApp no login.
-2. O sistema gera um link wa.link com token.
-3. Abra o WhatsApp e envie o token.
-4. Clique no link de verificação no site para concluir o login.
+1. Digite o WhatsApp e senha no login.
+2. O sistema valida as credenciais e gera um token de autenticação.
+3. Você é redirecionado automaticamente para o dashboard.

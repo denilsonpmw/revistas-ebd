@@ -4,6 +4,10 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
+  console.log('🚀 Inicializando banco de dados...');
+
+  // Criar áreas
+  console.log('📍 Criando áreas...');
   const areas = await prisma.$transaction([
     prisma.area.upsert({
       where: { name: 'Área 1' },
@@ -22,8 +26,10 @@ async function main() {
     })
   ]);
 
-  const [area1, area2, area3] = areas;
+  const [area1] = areas;
 
+  // Criar congregação sede
+  console.log('⛪ Criando congregação SEDE...');
   const sede = await prisma.congregation.upsert({
     where: { code: 'SEDE-001' },
     update: { name: 'SEDE', areaId: area1.id, isHeadquarters: true },
@@ -35,82 +41,32 @@ async function main() {
     }
   });
 
-  const area1Congregations = [
-    'Cong. Monte das Oliveiras',
-    'Cong. Nova Canaã',
-    'Cong. Rocha Eterna',
-    'Cong. Estrela da Manha',
-    'Cong. Rosa de Saron',
-    'Cong. Nova Beréia',
-    'Cong. Monte Sião',
-    'Cong. Emanuel',
-    'Cong. Nova Vida'
-  ];
-
-  const area2Congregations = [
-    'Cong. Filadélfia',
-    'Cong. Monte Horebe',
-    'Cong. Monte Sinai',
-    'Cong. Naiote',
-    'Cong. Lírio dos Vales',
-    'Sub-Sede',
-    'Cong. Mensageiros de Sião',
-    'Cong. Betsaida',
-    'Cong. Berseba',
-    'Cong. Quemuel'
-  ];
-
-  const area3Congregations = [
-    'Cong. Betânia',
-    'Cong. Monte Moriá',
-    'Cong. Monte Carmelo',
-    'Cong. Deus Proverá',
-    'Cong. Arca da Aliança',
-    'Cong. Monte Geresim',
-    'Cong. Galileia',
-    'Cong. Rocha Viva',
-    'Cong. Atalaia',
-    'Cong. Shalon'
-  ];
-
-  const toData = (items, areaId, prefix) =>
-    items.map((name, idx) => ({
-      name,
-      code: `${prefix}-${String(idx + 1).padStart(2, '0')}`,
-      areaId
-    }));
-
-  const congregations = [
-    ...toData(area1Congregations, area1.id, 'A1'),
-    ...toData(area2Congregations, area2.id, 'A2'),
-    ...toData(area3Congregations, area3.id, 'A3')
-  ];
-
-  for (const data of congregations) {
-    await prisma.congregation.upsert({
-      where: { code: data.code },
-      update: { name: data.name, areaId: data.areaId },
-      create: data
-    });
-  }
-
+  // Criar usuário administrador provisório
+  console.log('👤 Criando usuário administrador provisório...');
+  const adminWhatsapp = process.env.ADMIN_WHATSAPP || '5500000000000';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  const adminHashedPassword = await bcrypt.hash(adminPassword, 10);
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-  await prisma.user.upsert({
-    where: { whatsapp: '5500000000000' },
-    update: { congregationId: sede.id, role: 'ADMIN', active: true },
+  const admin = await prisma.user.upsert({
+    where: { whatsapp: adminWhatsapp },
+    update: { 
+      congregationId: sede.id, 
+      role: 'ADMIN', 
+      active: true,
+      password: hashedPassword
+    },
     create: {
-      name: 'Admin Sede',
-      whatsapp: '5500000000000',
+      name: 'Admin Provisório',
+      whatsapp: adminWhatsapp,
       congregationId: sede.id,
       role: 'ADMIN',
       active: true,
-      password: adminHashedPassword
+      password: hashedPassword
     }
   });
 
-
+  // Criar revistas padrão
+  console.log('📚 Criando revistas padrão...');
   const magazines = [
     { code: 'ADU-01', name: 'Lições Bíblicas Adultos', className: 'Lições Bíblicas Adultos', ageRange: '18+', unitPrice: 8.50 },
     { code: 'JOV-01', name: 'Lições Bíblicas Jovens', className: 'Lições Bíblicas Jovens', ageRange: '14-17', unitPrice: 7.50 },
@@ -126,12 +82,18 @@ async function main() {
       create: { ...mag }
     });
   }
+
+  console.log('\n✅ Inicialização concluída!');
+  console.log('\n📋 Credenciais do administrador:');
+  console.log(`   WhatsApp: ${adminWhatsapp}`);
+  console.log(`   Senha: ${adminPassword}`);
+  console.log('\n⚠️  IMPORTANTE: Altere a senha após o primeiro login!\n');
 }
 
 main()
   .then(() => prisma.$disconnect())
   .catch(async (e) => {
-    console.error(e);
+    console.error('❌ Erro na inicialização:', e);
     await prisma.$disconnect();
     process.exit(1);
   });
