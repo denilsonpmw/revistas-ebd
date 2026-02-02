@@ -30,7 +30,6 @@ COPY --from=builder /app/frontend/dist ./frontend/dist
 
 # Copiar source code
 COPY backend ./backend
-COPY prisma ./backend/prisma
 
 # Definir working directory
 WORKDIR /app/backend
