@@ -25,7 +25,6 @@ RUN apk add --no-cache openssl
 
 # Copiar dependências do builder
 COPY --from=builder /app/backend/node_modules ./backend/node_modules
-COPY --from=builder /app/backend/.prisma ./backend/.prisma
 COPY --from=builder /app/frontend/dist ./frontend/dist
 
 # Copiar source code
