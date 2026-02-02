@@ -23,11 +23,10 @@ WORKDIR /app
 # Instalar OpenSSL (necessário para Prisma)
 RUN apk add --no-cache openssl
 
-# Copiar dependências do builder
-COPY --from=builder /app/backend/node_modules ./backend/node_modules
+# Copiar frontend build
 COPY --from=builder /app/frontend/dist ./frontend/dist
 
-# Copiar source code do backend (incluindo prisma/)
+# Copiar todo o backend (incluindo node_modules e prisma/)
 COPY --from=builder /app/backend ./backend
 
 # Definir working directory
