@@ -14,12 +14,15 @@ const createSchema = z.object({
   name: z.string().min(1),
   className: z.string().min(1),
   ageRange: z.string().min(1),
-  unitPrice: z.union([z.number().positive(), z.string().min(1)]).transform(val => {
-    const num = typeof val === 'string' 
+  unitPrice: z.preprocess(
+    (val) => (val === undefined || val === null || val === '' ? 0 : val),
+    z.union([z.number(), z.string().min(1)])
+  ).transform(val => {
+    const num = typeof val === 'string'
       ? parseFloat(val.replace(/[^\d,]/g, '').replace(',', '.'))
       : val;
-    if (isNaN(num) || num <= 0) {
-      throw new Error('Preço deve ser um número positivo');
+    if (isNaN(num) || num < 0) {
+      throw new Error('Preço deve ser um número válido');
     }
     return num;
   })

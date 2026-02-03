@@ -63,8 +63,7 @@ export default function MagazinesPage() {
       code: values.code.trim(),
       name: values.name.trim(),
       className: values.className.trim(),
-      ageRange: values.ageRange.trim(),
-      unitPrice: 0
+      ageRange: values.ageRange.trim()
     });
   };
 
