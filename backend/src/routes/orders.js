@@ -54,6 +54,7 @@ router.post('/', requireRole(['USER', 'MANAGER', 'ADMIN']), async (req, res) => 
 
     processedItems.push({
       magazineId: item.magazineId,
+      combinationId: combination.id,
       quantity: item.quantity,
       unitPrice,
       totalValue: new Prisma.Decimal(itemTotal),
@@ -108,7 +109,10 @@ router.get('/', async (req, res) => {
       submittedBy: true,
       period: true,
       items: {
-        include: { magazine: true }
+        include: { 
+          magazine: true,
+          variantCombination: true
+        }
       }
     }
   });
@@ -141,7 +145,10 @@ router.get('/:id', async (req, res) => {
       submittedBy: true,
       period: true,
       items: {
-        include: { magazine: true }
+        include: { 
+          magazine: true,
+          variantCombination: true
+        }
       },
       approvedBy: true
     }

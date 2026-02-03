@@ -97,6 +97,7 @@ model MagazineVariantCombination {
   variantData     Json     // Armazena seleções: { "tipo-id": "option-id", ... }
   price           Decimal  // Preço específico desta combinação
   active          Boolean  @default(true)
+  orderItems      OrderItem[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -143,17 +144,19 @@ model Order {
 }
 
 model OrderItem {
-  id              String   @id @default(cuid())
-  orderId         String
-  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  magazineId      String
-  magazine        Magazine @relation(fields: [magazineId], references: [id])
-  quantity        Int
-  unitPrice       Decimal  // Preço unitário pago (já com a combinação)
-  totalValue      Decimal
-  variantData     Json?    // Armazena as variações selecionadas: { "tipo-id": "option-id", ... }
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                   String                    @id @default(cuid())
+  orderId              String
+  order                Order                     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  magazineId           String
+  magazine             Magazine                  @relation(fields: [magazineId], references: [id])
+  combinationId        String?
+  variantCombination   MagazineVariantCombination? @relation(fields: [combinationId], references: [id])
+  quantity             Int
+  unitPrice            Decimal  // Preço unitário pago (já com a combinação)
+  totalValue           Decimal
+  variantData          Json?    // Armazena as variações selecionadas: { "tipo-id": "option-id", ... }
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 enum OrderStatus {
