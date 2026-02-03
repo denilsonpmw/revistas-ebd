@@ -140,12 +140,15 @@ export default function DashboardPage() {
     if (!order.items || !Array.isArray(order.items)) return acc;
     
     order.items.forEach(item => {
-      const className = item.magazine?.className || 'Outros';
-      const existing = acc.find(entry => entry.name === className);
+      const magazineName = item.magazine?.name || 'Desconhecida';
+      const variantName = item.variantCombination?.name || item.variantData?.combinationName || 'Sem variação';
+      const displayName = `${magazineName} - ${variantName}`;
+      
+      const existing = acc.find(entry => entry.name === displayName);
       if (existing) {
         existing.quantidade += item.quantity || 0;
       } else {
-        acc.push({ name: className, quantidade: item.quantity || 0 });
+        acc.push({ name: displayName, quantidade: item.quantity || 0 });
       }
     });
     return acc;
