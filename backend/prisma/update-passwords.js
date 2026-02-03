@@ -17,22 +17,16 @@ async function main() {
 
   let updated = 0;
   for (const user of allUsers) {
-    // Verificar se a senha está vazia, é muito curta ou não é um hash bcrypt válido
-    const needsUpdate = !user.password || 
-                       user.password.length < 10 || 
-                       !user.password.startsWith('$2');
-    
-    if (needsUpdate) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { password: hashedPassword }
-      });
-      console.log(`✅ Senha atualizada para: ${user.name} (${user.whatsapp})`);
-      updated++;
-    }
+    // Sempre atualizar para garantir que o hash seja válido para 'senha123'
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+    console.log(`✅ Senha (re)criada para: ${user.name} (${user.whatsapp})`);
+    updated++;
   }
 
-  console.log(`\n📊 ${updated} senhas atualizadas de ${allUsers.length} usuários`);
+  console.log(`\n📊 ${updated} senhas (re)criadas`);
 
   console.log(`\n✨ Concluído! Senha padrão definida: ${defaultPassword}`);
   console.log('⚠️  Oriente os usuários a alterarem suas senhas após o primeiro acesso.');
