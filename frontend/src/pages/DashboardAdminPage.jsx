@@ -58,9 +58,15 @@ export default function DashboardAdminPage() {
   const areaStats = areas.map(area => {
     const areaCongregations = congregations.filter(c => c.areaId === area.id);
     const areaOrders = orders.filter(o => areaCongregations.some(c => c.id === o.congregationId));
+    
+    // Contar total de revistas (items) na área
+    const totalRevistas = areaOrders.reduce((sum, o) => {
+      return sum + (o.items?.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0) || 0);
+    }, 0);
+    
     return {
       name: area.name,
-      pedidos: areaOrders.length,
+      revistas: totalRevistas,
       valor: areaOrders.reduce((sum, o) => sum + Number(o.totalValue || 0), 0)
     };
   });
@@ -137,7 +143,7 @@ export default function DashboardAdminPage() {
         </div>
 
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-          <h3 className="mb-4 text-lg font-semibold">Pedidos por Área</h3>
+          <h3 className="mb-4 text-lg font-semibold">Pedidos de revistas por Área</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={areaStats}>
               <XAxis dataKey="name" stroke="#94a3b8" />
@@ -146,7 +152,7 @@ export default function DashboardAdminPage() {
                 labelStyle={{ color: '#f1f5f9' }}
                 itemStyle={{ color: '#6366f1' }}
               />
-              <Bar dataKey="pedidos" fill="#6366f1" name="Pedidos" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
+              <Bar dataKey="revistas" fill="#6366f1" name="Revistas" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
