@@ -92,7 +92,6 @@ export default function ReportsPage() {
       toast.success('PDF gerado com sucesso');
     } catch (error) {
       toast.error('Erro ao gerar PDF');
-      console.error(error);
     }
   };
 

@@ -30,13 +30,10 @@ export default function AppLayout() {
           newPassword: data.newPassword
         })
       });
-      
-      console.log('Resposta de change-password:', response);
       toast.success('Senha alterada com sucesso!');
       setShowChangePassword(false);
       reset();
     } catch (err) {
-      console.error('Erro ao alterar senha:', err);
       // Se for erro de autenticação, mostrar mensagem específica
       if (err.message.includes('incorreta')) {
         toast.error('Senha atual incorreta');

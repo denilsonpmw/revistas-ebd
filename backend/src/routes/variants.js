@@ -22,7 +22,6 @@ router.get('/:magazineId/combinations', async (req, res) => {
 
     res.json({ combinations: serialized });
   } catch (error) {
-    console.error('Erro ao buscar combinações:', error);
     res.status(500).json({ message: 'Erro ao buscar combinações' });
   }
 });
@@ -61,7 +60,6 @@ router.post('/:magazineId/combinations', async (req, res) => {
       // Violação de unique constraint
       return res.status(400).json({ message: 'Este código já existe para esta revista' });
     }
-    console.error('Erro ao criar combinação:', error);
     res.status(500).json({ message: 'Erro ao criar combinação' });
   }
 });
@@ -91,7 +89,6 @@ router.put('/combinations/:combinationId', async (req, res) => {
       // Violação de unique constraint
       return res.status(400).json({ message: 'Este código já existe para esta revista' });
     }
-    console.error('Erro ao atualizar combinação:', error);
     res.status(500).json({ message: 'Erro ao atualizar combinação' });
   }
 });
@@ -107,7 +104,6 @@ router.delete('/combinations/:combinationId', async (req, res) => {
 
     res.json({ message: 'Combinação deletada com sucesso' });
   } catch (error) {
-    console.error('Erro ao deletar combinação:', error);
     res.status(500).json({ message: 'Erro ao deletar combinação' });
   }
 });
@@ -130,7 +126,6 @@ router.get('/:magazineId/variants', async (req, res) => {
 
     res.json({ variantTypes });
   } catch (error) {
-    console.error('Erro ao buscar variações:', error);
     res.status(500).json({ message: 'Erro ao buscar variações' });
   }
 });
@@ -172,7 +167,6 @@ router.post('/:magazineId/variants', async (req, res) => {
 
     res.status(201).json(variantType);
   } catch (error) {
-    console.error('Erro ao criar tipo de variação:', error);
     res.status(500).json({ message: 'Erro ao criar tipo de variação' });
   }
 });
@@ -195,7 +189,6 @@ router.put('/variants/:variantTypeId', async (req, res) => {
 
     res.json(variantType);
   } catch (error) {
-    console.error('Erro ao atualizar tipo de variação:', error);
     res.status(500).json({ message: 'Erro ao atualizar tipo de variação' });
   }
 });
@@ -211,7 +204,6 @@ router.delete('/variants/:variantTypeId', async (req, res) => {
 
     res.json({ message: 'Tipo de variação deletado com sucesso' });
   } catch (error) {
-    console.error('Erro ao deletar tipo de variação:', error);
     res.status(500).json({ message: 'Erro ao deletar tipo de variação' });
   }
 });
@@ -245,7 +237,6 @@ router.post('/variants/:variantTypeId/options', async (req, res) => {
 
     res.status(201).json(option);
   } catch (error) {
-    console.error('Erro ao adicionar opção:', error);
     res.status(500).json({ message: 'Erro ao adicionar opção' });
   }
 });
@@ -267,7 +258,6 @@ router.put('/variants/options/:optionId', async (req, res) => {
 
     res.json(option);
   } catch (error) {
-    console.error('Erro ao atualizar opção:', error);
     res.status(500).json({ message: 'Erro ao atualizar opção' });
   }
 });
@@ -283,7 +273,6 @@ router.delete('/variants/options/:optionId', async (req, res) => {
 
     res.json({ message: 'Opção deletada com sucesso' });
   } catch (error) {
-    console.error('Erro ao deletar opção:', error);
     res.status(500).json({ message: 'Erro ao deletar opção' });
   }
 });

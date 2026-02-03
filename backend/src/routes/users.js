@@ -157,8 +157,6 @@ router.patch('/:id/reset-password', async (req, res) => {
       data: { password: hashedPassword }
     });
 
-    console.log(`🔐 Senha resetada para ${user.whatsapp}: ${tempPassword}`);
-
     return res.json({ 
       message: 'Senha resetada com sucesso',
       tempPassword, // Retornar para o admin copiar e enviar

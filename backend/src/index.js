@@ -49,13 +49,9 @@ if (fs.existsSync(webDist)) {
 }
 
 app.use((err, req, res, next) => {
-  // eslint-disable-next-line no-console
-  console.error(err);
   res.status(500).json({ message: 'Erro interno' });
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, '0.0.0.0', () => {
-  // eslint-disable-next-line no-console
-  console.log(`API running on port ${port}`);
 });

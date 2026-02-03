@@ -4,10 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🚀 Inicializando banco de dados...');
-
   // Criar áreas
-  console.log('📍 Criando áreas...');
   const areas = await prisma.$transaction([
     prisma.area.upsert({
       where: { name: 'Área 1' },
@@ -29,7 +26,6 @@ async function main() {
   const [area1] = areas;
 
   // Criar congregação sede
-  console.log('⛪ Criando congregação SEDE...');
   const sede = await prisma.congregation.upsert({
     where: { code: 'SEDE-001' },
     update: { name: 'SEDE', areaId: area1.id, isHeadquarters: true },
@@ -42,7 +38,6 @@ async function main() {
   });
 
   // Criar usuário administrador provisório
-  console.log('👤 Criando usuário administrador provisório...');
   const adminWhatsapp = process.env.ADMIN_WHATSAPP || '5500000000000';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -66,7 +61,6 @@ async function main() {
   });
 
   // Criar revistas padrão
-  console.log('📚 Criando revistas padrão...');
   const magazines = [
     { code: 'ADU-01', name: 'Lições Bíblicas Adultos', className: 'Lições Bíblicas Adultos', ageRange: '18+', unitPrice: 8.50 },
     { code: 'JOV-01', name: 'Lições Bíblicas Jovens', className: 'Lições Bíblicas Jovens', ageRange: '14-17', unitPrice: 7.50 },
@@ -82,18 +76,11 @@ async function main() {
       create: { ...mag }
     });
   }
-
-  console.log('\n✅ Inicialização concluída!');
-  console.log('\n📋 Credenciais do administrador:');
-  console.log(`   WhatsApp: ${adminWhatsapp}`);
-  console.log(`   Senha: ${adminPassword}`);
-  console.log('\n⚠️  IMPORTANTE: Altere a senha após o primeiro login!\n');
 }
 
 main()
   .then(() => prisma.$disconnect())
   .catch(async (e) => {
-    console.error('❌ Erro na inicialização:', e);
     await prisma.$disconnect();
     process.exit(1);
   });

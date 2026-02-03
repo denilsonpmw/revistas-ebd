@@ -17,7 +17,6 @@ export function AuthProvider({ children }) {
       const data = await apiRequest('/auth/me');
       setUser(data.user);
     } catch (err) {
-      console.error('Erro ao validar token:', err);
       clearToken();
       setUser(null);
     } finally {

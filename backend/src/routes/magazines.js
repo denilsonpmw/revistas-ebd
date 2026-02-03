@@ -107,11 +107,6 @@ router.get('/', async (req, res) => {
     }))
   }));
   
-  // Debug: verificar primeiro item
-  if (serializedMagazines.length > 0) {
-    console.log('First magazine unitPrice:', serializedMagazines[0].unitPrice, typeof serializedMagazines[0].unitPrice);
-  }
-  
   return res.json({ magazines: serializedMagazines });
 });
 

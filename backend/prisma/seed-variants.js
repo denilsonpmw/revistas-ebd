@@ -3,15 +3,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('📚 Adicionando variações às revistas...');
-
   // Buscar revista de adultos
   const adultMagazine = await prisma.magazine.findUnique({
     where: { code: 'ADU-01' }
   });
 
   if (!adultMagazine) {
-    console.log('❌ Revista ADU-01 não encontrada');
     return;
   }
 
@@ -118,17 +115,11 @@ async function main() {
       }
     });
   }
-
-  console.log('✅ Variações e combinações adicionadas com sucesso!');
-  console.log(`   - ${userType.name}: ${userType.options.map(o => o.name).join(', ')}`);
-  console.log(`   - ${coverType.name}: ${coverType.options.map(o => o.name).join(', ')}`);
-  console.log(`   - ${combinations.length} combinações de preços criadas`);
 }
 
 main()
   .then(() => prisma.$disconnect())
   .catch(async (e) => {
-    console.error('❌ Erro:', e);
     await prisma.$disconnect();
     process.exit(1);
   });

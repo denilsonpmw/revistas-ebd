@@ -63,7 +63,6 @@ router.get('/verify', async (req, res) => {
   const token = String(req.query.token || '').trim();
   
   if (!token) {
-    console.error('Token ausente na requisição /verify');
     return res.status(400).json({ message: 'Token inválido' });
   }
 
@@ -107,7 +106,6 @@ router.get('/verify', async (req, res) => {
 
     return res.json({ token: jwtToken, user });
   } catch (error) {
-    console.error('Erro em /verify:', error);
     return res.status(500).json({ message: 'Erro ao verificar token' });
   }
 });

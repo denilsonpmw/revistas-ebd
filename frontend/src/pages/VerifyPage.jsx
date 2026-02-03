@@ -66,7 +66,6 @@ export default function VerifyPage() {
           }
           return;
         }
-        console.error('Erro na verificação:', err);
         toast.error(message || 'Erro ao verificar token');
       })
       .finally(() => setLoading(false));
