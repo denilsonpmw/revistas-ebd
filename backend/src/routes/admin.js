@@ -59,8 +59,8 @@ router.get('/report', async (req, res) => {
       
       // Se não temos combinationId mas temos variantData com combinationId, usar aquele
       const effectiveCombinationId = item.combinationId || item.variantData?.combinationId;
-      const variantCode = item.variantCombination?.code || item.variantData?.combinationCode || '-';
-      const variantName = item.variantCombination?.name || item.variantData?.combinationName || 'Sem variação';
+      const variantCode = item.variantCombination?.code || item.variantData?.code || item.variantData?.combinationCode || '-';
+      const variantName = item.variantCombination?.name || item.variantData?.name || item.variantData?.combinationName || 'Sem variação';
       
       if (!groupedMap.has(key)) {
         groupedMap.set(key, {
