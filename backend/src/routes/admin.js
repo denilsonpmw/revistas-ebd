@@ -56,6 +56,12 @@ router.get('/report', async (req, res) => {
     for (const item of order.items) {
       // Chave única por congregação + revista + variação
       const key = `${order.congregationId}-${item.magazineId}-${item.combinationId || 'no-variant'}`;
+      
+      // Se não temos combinationId mas temos variantData com combinationId, usar aquele
+      const effectiveCombinationId = item.combinationId || item.variantData?.combinationId;
+      const variantCode = item.variantCombination?.code || item.variantData?.combinationCode || '-';
+      const variantName = item.variantCombination?.name || item.variantData?.combinationName || 'Sem variação';
+      
       if (!groupedMap.has(key)) {
         groupedMap.set(key, {
           congregationId: order.congregationId,
@@ -65,8 +71,8 @@ router.get('/report', async (req, res) => {
           magazineName: item.magazine.name,
           className: item.magazine.className,
           ageRange: item.magazine.ageRange,
-          variantCode: item.variantCombination?.code || '-',
-          variantName: item.variantCombination?.name || 'Sem variação',
+          variantCode,
+          variantName,
           period: period.name,
           status: order.status,
           quantity: 0,
