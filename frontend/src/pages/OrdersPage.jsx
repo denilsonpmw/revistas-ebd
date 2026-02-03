@@ -343,7 +343,6 @@ export default function OrdersPage() {
                 value={selectedMagazineId}
                 className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm w-full"
                 onChange={(e) => {
-                  console.log('Magazine selected:', e.target.value);
                   setSelectedMagazineId(e.target.value);
                   // Resetar variante quando mudar revista
                   setSelectedCombinationId(null);
@@ -358,36 +357,18 @@ export default function OrdersPage() {
                 ))}
               </select>
 
-              {/* Debug info */}
-              <div className="text-xs p-2 bg-slate-800 rounded text-slate-300">
-                Debug: selectedMagazineId = "{selectedMagazineId}" | Total magazines = {magazinesQuery.data?.magazines?.length || 0}
-              </div>
-
               {/* Mostrar seletor de variações se a revista tiver variantes */}
               {(() => {
                 const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
-                console.log('Render check - magazine:', !!magazine);
-                console.log('Render check - variantCombinations:', magazine?.variantCombinations);
-                console.log('Render check - combinations length:', magazine?.variantCombinations?.length);
                 
-                const hasVariations = magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0;
-                
-                if (!selectedMagazineId) {
-                  console.log('No magazine selected');
+                if (!selectedMagazineId || !magazine) {
                   return null;
                 }
                 
-                if (!magazine) {
-                  console.log('Magazine not found in array');
-                  return <div className="text-xs text-yellow-400">Carregando dados da revista...</div>;
+                if (!magazine.variantCombinations || magazine.variantCombinations.length === 0) {
+                  return null;
                 }
                 
-                if (!hasVariations) {
-                  console.log('No variations found');
-                  return <div className="text-xs text-yellow-400">Esta revista não tem variações (encontradas: {magazine.variantCombinations?.length || 0})</div>;
-                }
-                
-                console.log('Rendering VariantSelector!');
                 return (
                   <VariantSelector
                     magazine={magazine}
@@ -705,18 +686,13 @@ export default function OrdersPage() {
                   </select>
                   {(() => {
                     const magazine = magazinesQuery.data?.magazines?.find(m => m.id === editSelectedMagazineId);
-                    const hasVariations = magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0;
                     
-                    if (!editSelectedMagazineId) {
+                    if (!editSelectedMagazineId || !magazine) {
                       return null;
                     }
                     
-                    if (!magazine) {
-                      return <div className="text-xs text-yellow-400">Carregando dados da revista...</div>;
-                    }
-                    
-                    if (!hasVariations) {
-                      return <div className="text-xs text-yellow-400">Esta revista não tem variações</div>;
+                    if (!magazine.variantCombinations || magazine.variantCombinations.length === 0) {
+                      return null;
                     }
                     
                     return (

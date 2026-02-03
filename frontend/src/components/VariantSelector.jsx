@@ -1,11 +1,7 @@
 import React from 'react';
 
 export function VariantSelector({ magazine, selectedCombinationId, onCombinationChange, onPriceUpdate }) {
-  console.log('VariantSelector rendered with magazine:', magazine);
-  console.log('Has variantCombinations:', magazine?.variantCombinations?.length);
-  
   if (!magazine?.variantCombinations || magazine.variantCombinations.length === 0) {
-    console.log('VariantSelector returning null - no combinations');
     return null;
   }
 
