@@ -47,13 +47,33 @@ export default function DashboardAdminPage() {
   ].filter(item => item.value > 0);
 
   const magazineStats = magazines.map(mag => {
-    const magOrders = orders.filter(o => o.magazineId === mag.id);
-    return {
-      name: mag.code,
-      quantidade: magOrders.reduce((sum, o) => sum + o.quantity, 0),
-      valor: magOrders.reduce((sum, o) => sum + Number(o.totalValue || 0), 0)
-    };
-  }).filter(item => item.quantidade > 0);
+    const magOrders = orders.filter(o => o.items?.some(item => item.magazineId === mag.id));
+    
+    // Criar um mapa de revistas/variações
+    const variantMap = new Map();
+    for (const order of magOrders) {
+      for (const item of order.items || []) {
+        if (item.magazineId === mag.id) {
+          // Usar variação como chave se disponível, caso contrário usar código da revista
+          const key = item.variantCombination?.code || item.variantData?.combinationCode || `${mag.code}-sem-variação`;
+          const variantName = item.variantCombination?.name || item.variantData?.combinationName || 'Sem variação';
+          const displayName = `${mag.code} - ${variantName}`;
+          
+          if (!variantMap.has(displayName)) {
+            variantMap.set(displayName, 0);
+          }
+          variantMap.set(displayName, variantMap.get(displayName) + (item.quantity || 0));
+        }
+      }
+    }
+    
+    // Converter mapa para array de objetos
+    return Array.from(variantMap.entries()).map(([name, quantidade]) => ({
+      name,
+      quantidade,
+      valor: quantidade * (orders.find(o => o.items?.some(item => item.magazine?.code === mag.code))?.items?.[0]?.unitPrice || 0)
+    }));
+  }).flat().filter(item => item.quantidade > 0).sort((a, b) => b.quantidade - a.quantidade).slice(0, 5);
 
   const areaStats = areas.map(area => {
     const areaCongregations = congregations.filter(c => c.areaId === area.id);
@@ -161,11 +181,11 @@ export default function DashboardAdminPage() {
       {/* Gráfico de Revistas */}
       {magazineStats.length > 0 && (
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-          <h3 className="mb-4 text-lg font-semibold">Quantidade por Revista</h3>
+          <h3 className="mb-4 text-lg font-semibold">Top 5 Revistas/Variações</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={magazineStats}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
+              <XAxis dataKey="name" stroke="#94a3b8" angle={-45} textAnchor="end" height={100} />
               <YAxis stroke="#94a3b8" />
               <Tooltip
                 contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
