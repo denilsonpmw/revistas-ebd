@@ -249,7 +249,7 @@ export default function MagazinesCatalogPage() {
             {/* Rodapé do Catálogo */}
             <div className="mt-8 pt-4 border-t-2 border-slate-300 text-center text-xs text-slate-600">
               <p>Sistema de Controle de Revistas - EBD</p>
-              <p className="mt-1">Para pedidos, entre em contato com a administração</p>
+              <p className="mt-1">Para pedidos, acesse a aba de <strong>Pedidos</strong> e faça o seu.</p>
             </div>
           </div>
         )}
