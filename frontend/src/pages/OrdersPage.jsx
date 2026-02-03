@@ -93,12 +93,14 @@ const printStyles = `
 export default function OrdersPage() {
   const { register, handleSubmit, reset } = useForm();
   const [items, setItems] = useState([]);
+  const [selectedMagazineId, setSelectedMagazineId] = useState('');
   const [selectedCombinationId, setSelectedCombinationId] = useState(null);
   const [currentUnitPrice, setCurrentUnitPrice] = useState(0);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [editItems, setEditItems] = useState([]);
+  const [editSelectedMagazineId, setEditSelectedMagazineId] = useState('');
   const [editSelectedCombinationId, setEditSelectedCombinationId] = useState(null);
   const [editCurrentUnitPrice, setEditCurrentUnitPrice] = useState(0);
   const queryClient = useQueryClient();
@@ -198,6 +200,10 @@ export default function OrdersPage() {
           };
         })
       );
+      // Resetar seleção de revista e combinação para novo item
+      setEditSelectedMagazineId('');
+      setEditSelectedCombinationId(null);
+      setEditCurrentUnitPrice(0);
     }
   }, [editingOrderId, orderDetailQuery.data, magazinesQuery.data]);
 
@@ -230,10 +236,10 @@ export default function OrdersPage() {
   };
 
   const addItem = () => {
-    const magazineId = document.querySelector('[name="magazineId"]').value;
-    const quantity = parseInt(document.querySelector('[name="quantity"]').value) || 1;
+    const quantityInput = document.querySelector('[name="quantity"]');
+    const quantity = parseInt(quantityInput?.value) || 1;
 
-    if (!magazineId) {
+    if (!selectedMagazineId) {
       toast.error('Selecione uma revista');
       return;
     }
@@ -243,14 +249,14 @@ export default function OrdersPage() {
       return;
     }
 
-    const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+    const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
     if (!magazine) {
       toast.error('Revista não encontrada');
       return;
     }
 
     // Verificar se revista com mesma combinação já foi adicionada
-    if (items.some(item => item.magazineId === magazineId && item.combinationId === selectedCombinationId)) {
+    if (items.some(item => item.magazineId === selectedMagazineId && item.combinationId === selectedCombinationId)) {
       toast.error('Esta variação já foi adicionada');
       return;
     }
@@ -266,7 +272,7 @@ export default function OrdersPage() {
     const totalValue = Number((quantity * unitPrice).toFixed(2));
 
     setItems([...items, {
-      magazineId,
+      magazineId: selectedMagazineId,
       combinationId: selectedCombinationId,
       combinationName: combination.name,
       quantity,
@@ -281,8 +287,8 @@ export default function OrdersPage() {
     }]);
 
     // Limpar campos
-    document.querySelector('[name="magazineId"]').value = '';
-    document.querySelector('[name="quantity"]').value = '1';
+    setSelectedMagazineId('');
+    quantityInput.value = '1';
     setSelectedCombinationId(null);
     setCurrentUnitPrice(0);
   };
@@ -334,8 +340,10 @@ export default function OrdersPage() {
             <div className="space-y-2">
               <select
                 name="magazineId"
+                value={selectedMagazineId}
                 className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm w-full"
                 onChange={(e) => {
+                  setSelectedMagazineId(e.target.value);
                   // Resetar variante quando mudar revista
                   setSelectedCombinationId(null);
                   setCurrentUnitPrice(0);
@@ -351,8 +359,7 @@ export default function OrdersPage() {
 
               {/* Mostrar seletor de variações se a revista tiver variantes */}
               {(() => {
-                const magazineId = document.querySelector('[name="magazineId"]')?.value;
-                const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+                const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
                 return magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0 ? (
                   <VariantSelector
                     magazine={magazine}
@@ -653,8 +660,10 @@ export default function OrdersPage() {
                 <div className="mt-2 space-y-2">
                   <select
                     name="editMagazineId"
+                    value={editSelectedMagazineId}
                     className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm w-full"
-                    onChange={() => {
+                    onChange={(e) => {
+                      setEditSelectedMagazineId(e.target.value);
                       setEditSelectedCombinationId(null);
                       setEditCurrentUnitPrice(0);
                     }}
@@ -667,8 +676,7 @@ export default function OrdersPage() {
                     ))}
                   </select>
                   {(() => {
-                    const magazineId = document.querySelector('[name="editMagazineId"]')?.value;
-                    const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+                    const magazine = magazinesQuery.data?.magazines?.find(m => m.id === editSelectedMagazineId);
                     return magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0 ? (
                       <VariantSelector
                         magazine={magazine}
@@ -690,10 +698,10 @@ export default function OrdersPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const magazineId = document.querySelector('[name="editMagazineId"]').value;
-                        const quantity = parseInt(document.querySelector('[name="editQuantity"]').value) || 1;
+                        const quantityInput = document.querySelector('[name="editQuantity"]');
+                        const quantity = parseInt(quantityInput?.value) || 1;
 
-                        if (!magazineId) {
+                        if (!editSelectedMagazineId) {
                           toast.error('Selecione uma revista');
                           return;
                         }
@@ -703,12 +711,12 @@ export default function OrdersPage() {
                           return;
                         }
 
-                        if (editItems.some(item => item.magazineId === magazineId && item.combinationId === editSelectedCombinationId)) {
+                        if (editItems.some(item => item.magazineId === editSelectedMagazineId && item.combinationId === editSelectedCombinationId)) {
                           toast.error('Esta revista já foi adicionada');
                           return;
                         }
 
-                        const magazine = magazinesQuery.data?.magazines?.find(m => m.id === magazineId);
+                        const magazine = magazinesQuery.data?.magazines?.find(m => m.id === editSelectedMagazineId);
                         if (!magazine) {
                           toast.error('Revista não encontrada');
                           return;
@@ -724,7 +732,7 @@ export default function OrdersPage() {
                         const totalValue = Number((quantity * unitPrice).toFixed(2));
 
                         setEditItems([...editItems, {
-                          magazineId,
+                          magazineId: editSelectedMagazineId,
                           quantity,
                           magazine,
                           combinationId: editSelectedCombinationId,
@@ -733,8 +741,8 @@ export default function OrdersPage() {
                           totalValue
                         }]);
 
-                        document.querySelector('[name="editMagazineId"]').value = '';
-                        document.querySelector('[name="editQuantity"]').value = '1';
+                        setEditSelectedMagazineId('');
+                        quantityInput.value = '1';
                         setEditSelectedCombinationId(null);
                         setEditCurrentUnitPrice(0);
                       }}
