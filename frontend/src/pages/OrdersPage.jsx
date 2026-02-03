@@ -343,6 +343,7 @@ export default function OrdersPage() {
                 value={selectedMagazineId}
                 className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm w-full"
                 onChange={(e) => {
+                  console.log('Magazine selected:', e.target.value);
                   setSelectedMagazineId(e.target.value);
                   // Resetar variante quando mudar revista
                   setSelectedCombinationId(null);
@@ -357,9 +358,18 @@ export default function OrdersPage() {
                 ))}
               </select>
 
+              {/* Debug info */}
+              <div className="text-xs p-2 bg-slate-800 rounded text-slate-300">
+                Debug: selectedMagazineId = "{selectedMagazineId}" | Total magazines = {magazinesQuery.data?.magazines?.length || 0}
+              </div>
+
               {/* Mostrar seletor de variações se a revista tiver variantes */}
               {(() => {
                 const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
+                console.log('Found magazine:', magazine);
+                console.log('Has variantCombinations:', !!magazine?.variantCombinations);
+                console.log('Combinations count:', magazine?.variantCombinations?.length || 0);
+                
                 const hasVariations = magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0;
                 
                 if (!selectedMagazineId) {
@@ -371,7 +381,7 @@ export default function OrdersPage() {
                 }
                 
                 if (!hasVariations) {
-                  return <div className="text-xs text-yellow-400">Esta revista não tem variações</div>;
+                  return <div className="text-xs text-yellow-400">Esta revista não tem variações (encontradas: {magazine.variantCombinations?.length || 0})</div>;
                 }
                 
                 return (
