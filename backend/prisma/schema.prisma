@@ -92,12 +92,15 @@ model MagazineVariantCombination {
   id              String   @id @default(cuid())
   magazineId      String
   magazine        Magazine @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  code            String   // Código de referência único (ex: "ADU-ALU-001")
   name            String   // Ex: "Aluno - Letra Grande" (para exibição)
   variantData     Json     // Armazena seleções: { "tipo-id": "option-id", ... }
   price           Decimal  // Preço específico desta combinação
   active          Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([magazineId, code])
 }
 
 

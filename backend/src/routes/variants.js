@@ -31,16 +31,22 @@ router.get('/:magazineId/combinations', async (req, res) => {
 router.post('/:magazineId/combinations', async (req, res) => {
   try {
     const { magazineId } = req.params;
-    const { name, variantData, price } = req.body;
+    const { name, code, variantData, price } = req.body;
 
-    if (!name || !variantData || typeof price !== 'number') {
-      return res.status(400).json({ message: 'Nome, variantData e price são obrigatórios' });
+    if (!name || !code || !variantData || typeof price !== 'number') {
+      return res.status(400).json({ message: 'Nome, código, variantData e price são obrigatórios' });
+    }
+
+    // Validar formato do código (opcional, mas recomendado)
+    if (!/^[A-Z0-9\-]+$/.test(code)) {
+      return res.status(400).json({ message: 'Código deve conter apenas letras maiúsculas, números e hífens' });
     }
 
     const combination = await prisma.magazineVariantCombination.create({
       data: {
         magazineId,
         name,
+        code: code.toUpperCase(),
         variantData,
         price
       }
@@ -51,6 +57,10 @@ router.post('/:magazineId/combinations', async (req, res) => {
       price: Number(combination.price)
     });
   } catch (error) {
+    if (error.code === 'P2002') {
+      // Violação de unique constraint
+      return res.status(400).json({ message: 'Este código já existe para esta revista' });
+    }
     console.error('Erro ao criar combinação:', error);
     res.status(500).json({ message: 'Erro ao criar combinação' });
   }
@@ -60,12 +70,13 @@ router.post('/:magazineId/combinations', async (req, res) => {
 router.put('/combinations/:combinationId', async (req, res) => {
   try {
     const { combinationId } = req.params;
-    const { name, price, active } = req.body;
+    const { name, code, price, active } = req.body;
 
     const combination = await prisma.magazineVariantCombination.update({
       where: { id: combinationId },
       data: {
         ...(name && { name }),
+        ...(code && { code: code.toUpperCase() }),
         ...(typeof price === 'number' && { price }),
         ...(typeof active === 'boolean' && { active })
       }
@@ -76,6 +87,10 @@ router.put('/combinations/:combinationId', async (req, res) => {
       price: Number(combination.price)
     });
   } catch (error) {
+    if (error.code === 'P2002') {
+      // Violação de unique constraint
+      return res.status(400).json({ message: 'Este código já existe para esta revista' });
+    }
     console.error('Erro ao atualizar combinação:', error);
     res.status(500).json({ message: 'Erro ao atualizar combinação' });
   }

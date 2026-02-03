@@ -62,41 +62,49 @@ async function main() {
   const combinations = [
     {
       name: 'Aluno - Normal',
+      code: 'ADU-001',
       variantData: { [userType.id]: userTypeAluno.id, [coverType.id]: coverNormal.id },
       price: 8.50
     },
     {
       name: 'Aluno - Capa Dura',
+      code: 'ADU-002',
       variantData: { [userType.id]: userTypeAluno.id, [coverType.id]: coverCapaDura.id },
       price: 13.50
     },
     {
       name: 'Aluno - Letra Grande',
+      code: 'ADU-003',
       variantData: { [userType.id]: userTypeAluno.id, [coverType.id]: coverLetraGrande.id },
       price: 11.50
     },
     {
       name: 'Aluno - Livro de Apoio',
+      code: 'ADU-004',
       variantData: { [userType.id]: userTypeAluno.id, [coverType.id]: coverLivroApoio.id },
       price: 12.50
     },
     {
       name: 'Professor - Normal',
+      code: 'ADU-005',
       variantData: { [userType.id]: userTypeProfessor.id, [coverType.id]: coverNormal.id },
       price: 10.50
     },
     {
       name: 'Professor - Capa Dura',
+      code: 'ADU-006',
       variantData: { [userType.id]: userTypeProfessor.id, [coverType.id]: coverCapaDura.id },
       price: 15.50
     },
     {
       name: 'Professor - Letra Grande',
+      code: 'ADU-007',
       variantData: { [userType.id]: userTypeProfessor.id, [coverType.id]: coverLetraGrande.id },
       price: 13.50
     },
     {
       name: 'Professor - Livro de Apoio',
+      code: 'ADU-008',
       variantData: { [userType.id]: userTypeProfessor.id, [coverType.id]: coverLivroApoio.id },
       price: 14.50
     }

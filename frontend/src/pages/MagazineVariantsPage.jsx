@@ -7,6 +7,7 @@ export default function MagazineVariantsPage() {
   const [selectedMagazineId, setSelectedMagazineId] = useState(null);
   const [showNewCombo, setShowNewCombo] = useState(false);
   const [newComboName, setNewComboName] = useState('');
+  const [newComboCode, setNewComboCode] = useState('');
   const [newComboPrice, setNewComboPrice] = useState('');
   const [newComboVariantData, setNewComboVariantData] = useState({});
   const queryClient = useQueryClient();
@@ -19,11 +20,12 @@ export default function MagazineVariantsPage() {
   const selectedMagazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
 
   const createCombinationMutation = useMutation({
-    mutationFn: ({ magazineId, name, price, variantData }) =>
+    mutationFn: ({ magazineId, name, code, price, variantData }) =>
       apiRequest(`/variants/${magazineId}/combinations`, {
         method: 'POST',
         body: JSON.stringify({
           name,
+          code,
           price: Number(price),
           variantData: variantData || {}
         })
@@ -31,6 +33,7 @@ export default function MagazineVariantsPage() {
     onSuccess: () => {
       toast.success('Combinação criada com sucesso');
       setNewComboName('');
+      setNewComboCode('');
       setNewComboPrice('');
       setNewComboVariantData({});
       setShowNewCombo(false);
@@ -40,11 +43,12 @@ export default function MagazineVariantsPage() {
   });
 
   const updateCombinationMutation = useMutation({
-    mutationFn: ({ combinationId, name, price, variantData }) =>
+    mutationFn: ({ combinationId, name, code, price, variantData }) =>
       apiRequest(`/variants/combinations/${combinationId}`, {
         method: 'PUT',
         body: JSON.stringify({
           name,
+          code,
           price: Number(price),
           variantData: variantData || {}
         })
@@ -69,13 +73,14 @@ export default function MagazineVariantsPage() {
   });
 
   const handleCreateCombination = () => {
-    if (!selectedMagazineId || !newComboName.trim() || !newComboPrice) {
-      toast.error('Preencha o nome e o preço da combinação');
+    if (!selectedMagazineId || !newComboName.trim() || !newComboCode.trim() || !newComboPrice) {
+      toast.error('Preencha o nome, código e preço da combinação');
       return;
     }
     createCombinationMutation.mutate({
       magazineId: selectedMagazineId,
       name: newComboName,
+      code: newComboCode,
       price: newComboPrice,
       variantData: newComboVariantData
     });
@@ -144,6 +149,16 @@ export default function MagazineVariantsPage() {
                       />
                     </div>
                     <div>
+                      <label className="block text-sm text-slate-400 mb-2">Código da Combinação</label>
+                      <input
+                        type="text"
+                        value={newComboCode}
+                        onChange={(e) => setNewComboCode(e.target.value.toUpperCase())}
+                        placeholder="Ex: ADU-001, ADU-002..."
+                        className="w-full rounded bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-sm text-slate-400 mb-2">Preço (R$)</label>
                       <input
                         type="number"
@@ -167,6 +182,7 @@ export default function MagazineVariantsPage() {
                         onClick={() => {
                           setShowNewCombo(false);
                           setNewComboName('');
+                          setNewComboCode('');
                           setNewComboPrice('');
                           setNewComboVariantData({});
                         }}
@@ -187,8 +203,11 @@ export default function MagazineVariantsPage() {
                     <div key={combo.id} className="rounded border border-slate-800 bg-slate-900 p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-semibold text-lg">{combo.name}</h4>
-                          <p className="text-sm text-slate-400">R$ {Number(combo.price).toFixed(2)}</p>
+                          <div className="flex items-center gap-3">
+                            <h4 className="font-semibold text-lg">{combo.name}</h4>
+                            <span className="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">{combo.code}</span>
+                          </div>
+                          <p className="text-sm text-slate-400 mt-1">R$ {Number(combo.price).toFixed(2)}</p>
                           {combo.variantData && Object.keys(combo.variantData).length > 0 && (
                             <div className="text-xs text-slate-400 mt-2">
                               {Object.entries(combo.variantData).map(([key, value]) => (
