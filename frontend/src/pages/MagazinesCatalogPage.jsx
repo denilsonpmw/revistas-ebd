@@ -198,7 +198,6 @@ export default function MagazinesCatalogPage() {
                   <th className="p-3 text-left font-bold">Nome da Revista</th>
                   <th className="p-3 text-left font-bold">Classe</th>
                   <th className="p-3 text-left font-bold">Faixa Etária</th>
-                  <th className="p-3 text-right font-bold">Preço Unit.</th>
                   <th className="p-3 text-left font-bold">Variações</th>
                   <th className="p-3 text-center font-bold">Status</th>
                 </tr>
@@ -212,14 +211,6 @@ export default function MagazinesCatalogPage() {
                     <td className="p-3 font-medium">{mag.name}</td>
                     <td className="p-3">{mag.className}</td>
                     <td className="p-3 text-center">{mag.ageRange}</td>
-                    <td className="p-3 text-right">
-                      <span className="font-semibold text-emerald-700">
-                        R$ {Number(mag.unitPrice).toLocaleString('pt-BR', { 
-                          minimumFractionDigits: 2, 
-                          maximumFractionDigits: 2 
-                        })}
-                      </span>
-                    </td>
                     <td className="p-3">
                       {mag.variantCombinations && mag.variantCombinations.length > 0 ? (
                         <div className="text-xs text-slate-700">
@@ -249,7 +240,7 @@ export default function MagazinesCatalogPage() {
               </tbody>
               <tfoot className="bg-slate-100 border-t-2 border-slate-300">
                 <tr>
-                  <td colSpan="4" className="p-3 font-bold text-right">Total de Revistas:</td>
+                  <td colSpan="3" className="p-3 font-bold text-right">Total de Revistas:</td>
                   <td className="p-3 text-right font-bold">{totalRevistas}</td>
                   <td className="p-3"></td>
                 </tr>
