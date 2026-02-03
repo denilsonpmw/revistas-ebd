@@ -360,14 +360,28 @@ export default function OrdersPage() {
               {/* Mostrar seletor de variações se a revista tiver variantes */}
               {(() => {
                 const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
-                return magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0 ? (
+                const hasVariations = magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0;
+                
+                if (!selectedMagazineId) {
+                  return null;
+                }
+                
+                if (!magazine) {
+                  return <div className="text-xs text-yellow-400">Carregando dados da revista...</div>;
+                }
+                
+                if (!hasVariations) {
+                  return <div className="text-xs text-yellow-400">Esta revista não tem variações</div>;
+                }
+                
+                return (
                   <VariantSelector
                     magazine={magazine}
                     selectedCombinationId={selectedCombinationId}
                     onCombinationChange={(combId) => setSelectedCombinationId(combId)}
                     onPriceUpdate={(price) => setCurrentUnitPrice(price)}
                   />
-                ) : null;
+                );
               })()}
 
               <div className="flex gap-2">
@@ -677,14 +691,28 @@ export default function OrdersPage() {
                   </select>
                   {(() => {
                     const magazine = magazinesQuery.data?.magazines?.find(m => m.id === editSelectedMagazineId);
-                    return magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0 ? (
+                    const hasVariations = magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0;
+                    
+                    if (!editSelectedMagazineId) {
+                      return null;
+                    }
+                    
+                    if (!magazine) {
+                      return <div className="text-xs text-yellow-400">Carregando dados da revista...</div>;
+                    }
+                    
+                    if (!hasVariations) {
+                      return <div className="text-xs text-yellow-400">Esta revista não tem variações</div>;
+                    }
+                    
+                    return (
                       <VariantSelector
                         magazine={magazine}
                         selectedCombinationId={editSelectedCombinationId}
                         onCombinationChange={(combId) => setEditSelectedCombinationId(combId)}
                         onPriceUpdate={(price) => setEditCurrentUnitPrice(price)}
                       />
-                    ) : null;
+                    );
                   })()}
                   <div className="flex gap-2">
                     <input
