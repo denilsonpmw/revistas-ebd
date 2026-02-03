@@ -35,21 +35,27 @@ router.get('/report', async (req, res) => {
     return res.status(404).json({ message: 'Período não encontrado' });
   }
 
-  // Busca orders do período com items
+  // Busca orders do período com items e combinações
   const orders = await prisma.order.findMany({
     where: { periodId },
     include: {
       congregation: { include: { area: true } },
-      items: { include: { magazine: true } }
+      items: { 
+        include: { 
+          magazine: true,
+          variantCombination: true
+        } 
+      }
     }
   });
 
-  // Agrupa por congregação e revista
+  // Agrupa por congregação, revista E variação
   const groupedMap = new Map();
   
   for (const order of orders) {
     for (const item of order.items) {
-      const key = `${order.congregationId}-${item.magazineId}`;
+      // Chave única por congregação + revista + variação
+      const key = `${order.congregationId}-${item.magazineId}-${item.combinationId || 'no-variant'}`;
       if (!groupedMap.has(key)) {
         groupedMap.set(key, {
           congregationId: order.congregationId,
@@ -59,9 +65,12 @@ router.get('/report', async (req, res) => {
           magazineName: item.magazine.name,
           className: item.magazine.className,
           ageRange: item.magazine.ageRange,
+          variantCode: item.variantCombination?.code || '-',
+          variantName: item.variantCombination?.name || 'Sem variação',
           period: period.name,
           status: order.status,
           quantity: 0,
+          unitPrice: Number(item.unitPrice || 0),
           totalValue: 0
         });
       }

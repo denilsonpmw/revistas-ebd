@@ -131,11 +131,11 @@ export default function ReportsPage() {
       o.congregationId === user?.congregationId
     );
 
-    // Converte orders para formato de rows
+    // Converte orders para formato de rows incluindo variações
     const rowsMap = new Map();
     for (const order of myOrders) {
       for (const item of order.items || []) {
-        const key = `${item.magazineId}`;
+        const key = `${item.magazineId}-${item.combinationId || 'no-variant'}`;
         if (!rowsMap.has(key)) {
           rowsMap.set(key, {
             congregationId: order.congregationId,
@@ -143,8 +143,11 @@ export default function ReportsPage() {
             magazineCode: item.magazine?.code || '',
             magazineName: item.magazine?.name || '',
             className: item.magazine?.className || '',
+            variantCode: item.variantData?.combinationCode || item.combinationCode || '-',
+            variantName: item.variantData?.combinationName || item.combinationName || 'Sem variação',
             status: order.status,
             quantity: 0,
+            unitPrice: Number(item.unitPrice || 0),
             totalValue: 0
           });
         }
@@ -304,22 +307,29 @@ export default function ReportsPage() {
                   <table className="w-full text-xs">
                     <thead className="bg-slate-100 border-b border-slate-300">
                       <tr>
-                        <th className="p-2 text-left font-semibold">Código</th>
+                        <th className="p-2 text-left font-semibold">Cód. Variação</th>
                         <th className="p-2 text-left font-semibold">Revista</th>
-                        <th className="p-2 text-left font-semibold">Classe</th>
-                        <th className="p-2 text-left font-semibold">Status</th>
-                        <th className="p-2 text-right font-semibold">Qtd</th>
+                        <th className="p-2 text-left font-semibold">Variação</th>
+                        <th className="p-2 text-center font-semibold">Qtd</th>
                         <th className="p-2 text-right font-semibold">Preço Unit.</th>
                         <th className="p-2 text-right font-semibold">Total</th>
+                        <th className="p-2 text-center font-semibold">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.items.map((row, idx) => (
                         <tr key={idx} className="border-b border-slate-200">
-                          <td className="p-2">{row.magazineCode}</td>
+                          <td className="p-2 font-mono text-xs">{row.variantCode || '-'}</td>
                           <td className="p-2">{row.magazineName}</td>
-                          <td className="p-2">{row.className}</td>
-                          <td className="p-2">
+                          <td className="p-2 text-slate-600">{row.variantName || '-'}</td>
+                          <td className="p-2 text-center font-semibold">{row.quantity}</td>
+                          <td className="p-2 text-right">
+                            R$ {Number(row.unitPrice || (row.totalValue / row.quantity)).toFixed(2)}
+                          </td>
+                          <td className="p-2 text-right font-bold">
+                            R$ {Number(row.totalValue).toFixed(2)}
+                          </td>
+                          <td className="p-2 text-center">
                             <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                               row.status === 'PENDING' ? 'bg-yellow-200 text-yellow-800' :
                               row.status === 'APPROVED' ? 'bg-blue-200 text-blue-800' :
@@ -328,13 +338,6 @@ export default function ReportsPage() {
                             }`}>
                               {statusPT[row.status] || row.status}
                             </span>
-                          </td>
-                          <td className="p-2 text-right">{row.quantity}</td>
-                          <td className="p-2 text-right">
-                            R$ {(Number(row.totalValue) / Number(row.quantity)).toFixed(2)}
-                          </td>
-                          <td className="p-2 text-right font-semibold">
-                            R$ {Number(row.totalValue).toFixed(2)}
                           </td>
                         </tr>
                       ))}
