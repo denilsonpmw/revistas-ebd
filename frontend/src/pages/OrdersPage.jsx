@@ -116,6 +116,15 @@ export default function OrdersPage() {
     }
   }, [meQuery.data]);
 
+  // Debug para rastrear mudanças no selectedMagazineId
+  React.useEffect(() => {
+    if (selectedMagazineId) {
+      const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
+      console.log('useEffect triggered - Magazine found:', !!magazine);
+      console.log('useEffect - Combinations:', magazine?.variantCombinations?.length || 0);
+    }
+  }, [selectedMagazineId, magazinesQuery.data?.magazines]);
+
   const ordersQuery = useQuery({
     queryKey: ['orders'],
     queryFn: () => apiRequest('/orders'),
@@ -366,24 +375,28 @@ export default function OrdersPage() {
               {/* Mostrar seletor de variações se a revista tiver variantes */}
               {(() => {
                 const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
-                console.log('Found magazine:', magazine);
-                console.log('Has variantCombinations:', !!magazine?.variantCombinations);
-                console.log('Combinations count:', magazine?.variantCombinations?.length || 0);
+                console.log('Render check - magazine:', !!magazine);
+                console.log('Render check - variantCombinations:', magazine?.variantCombinations);
+                console.log('Render check - combinations length:', magazine?.variantCombinations?.length);
                 
                 const hasVariations = magazine && magazine.variantCombinations && magazine.variantCombinations.length > 0;
                 
                 if (!selectedMagazineId) {
+                  console.log('No magazine selected');
                   return null;
                 }
                 
                 if (!magazine) {
+                  console.log('Magazine not found in array');
                   return <div className="text-xs text-yellow-400">Carregando dados da revista...</div>;
                 }
                 
                 if (!hasVariations) {
+                  console.log('No variations found');
                   return <div className="text-xs text-yellow-400">Esta revista não tem variações (encontradas: {magazine.variantCombinations?.length || 0})</div>;
                 }
                 
+                console.log('Rendering VariantSelector!');
                 return (
                   <VariantSelector
                     magazine={magazine}
