@@ -136,6 +136,22 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   // Dados para gráfico - Pedidos por Classe
+  const ordersByClass = myOrders.reduce((acc, order) => {
+    if (!order.items || !Array.isArray(order.items)) return acc;
+    
+    order.items.forEach(item => {
+      const className = item.magazine?.className || 'Outros';
+      const existing = acc.find(entry => entry.name === className);
+      if (existing) {
+        existing.quantidade += item.quantity || 0;
+      } else {
+        acc.push({ name: className, quantidade: item.quantity || 0 });
+      }
+    });
+    return acc;
+  }, []).sort((a, b) => b.quantidade - a.quantidade);
+
+  // Dados para gráfico - Top 5 Revistas com Variações
   const ordersByMagazine = myOrders.reduce((acc, order) => {
     if (!order.items || !Array.isArray(order.items)) return acc;
     
@@ -346,14 +362,14 @@ export default function DashboardPage() {
         {/* Gráfico de Pedidos por Classe */}
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Pedidos por Classe</h3>
-          {ordersByMagazine.length === 0 ? (
+          {ordersByClass.length === 0 ? (
             <div className="text-center py-16 text-slate-400">
               <div className="text-4xl mb-2">📊</div>
               <p>Nenhum dado disponível</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={ordersByMagazine}>
+              <BarChart data={ordersByClass}>
                 <XAxis dataKey="name" stroke="#94a3b8" />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
