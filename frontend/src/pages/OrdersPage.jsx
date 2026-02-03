@@ -116,15 +116,6 @@ export default function OrdersPage() {
     }
   }, [meQuery.data]);
 
-  // Debug para rastrear mudanças no selectedMagazineId
-  React.useEffect(() => {
-    if (selectedMagazineId) {
-      const magazine = magazinesQuery.data?.magazines?.find(m => m.id === selectedMagazineId);
-      console.log('useEffect triggered - Magazine found:', !!magazine);
-      console.log('useEffect - Combinations:', magazine?.variantCombinations?.length || 0);
-    }
-  }, [selectedMagazineId, magazinesQuery.data?.magazines]);
-
   const ordersQuery = useQuery({
     queryKey: ['orders'],
     queryFn: () => apiRequest('/orders'),
