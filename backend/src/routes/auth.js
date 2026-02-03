@@ -45,10 +45,19 @@ router.post('/request-link', async (req, res) => {
 
   // Validar senha
   console.log(`[AUTH] Validando senha para ${user.name}`);
+  console.log(`[AUTH] Senha fornecida tem ${password.length} caracteres`);
+  console.log(`[AUTH] Hash no banco começa com: ${user.password?.substring(0, 10) || 'VAZIO'}`);
+  
   const validPassword = await bcrypt.compare(password, user.password);
   console.log(`[AUTH] Validação de senha: ${validPassword ? 'OK' : 'FALHOU'}`);
   
   if (!validPassword) {
+    console.log(`[AUTH] Tentando recriar hash com a senha padrão...`);
+    const defaultPass = 'senha123';
+    const hashedDefault = await bcrypt.hash(defaultPass, 10);
+    console.log(`[AUTH] Hash padrão gerado: ${hashedDefault}`);
+    console.log(`[AUTH] Comparando padrão com entrada: ${await bcrypt.compare(defaultPass, hashedDefault)}`);
+    
     console.log(`[AUTH] Senha incorreta para ${user.name}`);
     return res.status(401).json({ message: 'WhatsApp ou senha incorretos' });
   }
