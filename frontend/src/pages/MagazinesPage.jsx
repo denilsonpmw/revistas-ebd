@@ -132,7 +132,17 @@ export default function MagazinesPage() {
               <tbody className="bg-slate-900 divide-y divide-slate-800">
                 {magazinesQuery.data.magazines.map((mag) => (
                   <tr key={mag.id} className="hover:bg-slate-800/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-100">{mag.code}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-100">
+                      {editingId === mag.id ? (
+                        <input
+                          value={editData.code || mag.code}
+                          onChange={(e) => setEditData({ ...editData, code: e.target.value })}
+                          className="w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
+                        />
+                      ) : (
+                        mag.code
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
                       {editingId === mag.id ? (
                         <input
@@ -204,6 +214,7 @@ export default function MagazinesPage() {
                             onClick={() => {
                               setEditingId(mag.id);
                               setEditData({ 
+                                code: mag.code,
                                 name: mag.name, 
                                 className: mag.className, 
                                 ageRange: mag.ageRange
