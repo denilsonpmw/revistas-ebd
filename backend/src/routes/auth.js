@@ -21,22 +21,39 @@ router.post('/request-link', async (req, res) => {
 
   // Normalizar WhatsApp: remover espaços, hífens, parênteses
   let { whatsapp, password } = parse.data;
+  const whatsappOriginal = whatsapp;
   whatsapp = whatsapp.replace(/[\s\-\(\)]/g, '');
+  
+  console.log(`[AUTH] Tentativa de login - WhatsApp original: ${whatsappOriginal}, normalizado: ${whatsapp}`);
 
   const user = await prisma.user.findUnique({ where: { whatsapp } });
+  
   if (!user) {
+    console.log(`[AUTH] Usuário não encontrado com WhatsApp: ${whatsapp}`);
+    // Listar todos os WhatsApps do banco para debug
+    const allUsers = await prisma.user.findMany({ select: { whatsapp: true, name: true } });
+    console.log('[AUTH] WhatsApps cadastrados:', allUsers.map(u => u.whatsapp).join(', '));
     return res.status(404).json({ message: 'WhatsApp ou senha incorretos' });
   }
+  
+  console.log(`[AUTH] Usuário encontrado: ${user.name}`);
+  
   if (!user.active) {
+    console.log(`[AUTH] Usuário inativo: ${user.name}`);
     return res.status(403).json({ message: 'Cadastro pendente de aprovação' });
   }
 
   // Validar senha
+  console.log(`[AUTH] Validando senha para ${user.name}`);
   const validPassword = await bcrypt.compare(password, user.password);
+  console.log(`[AUTH] Validação de senha: ${validPassword ? 'OK' : 'FALHOU'}`);
+  
   if (!validPassword) {
+    console.log(`[AUTH] Senha incorreta para ${user.name}`);
     return res.status(401).json({ message: 'WhatsApp ou senha incorretos' });
   }
 
+  console.log(`[AUTH] Autenticação bem-sucedida para ${user.name}`);
   const token = uuidv4();
   const minutes = Number(process.env.TOKEN_EXP_MINUTES || 15);
   const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
