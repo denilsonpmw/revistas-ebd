@@ -1,6 +1,6 @@
 {
   "name": "revistas-ebd-server",
-  "version": "1.0.0",
+  "version": "1.02.0",
   "private": true,
   "main": "src/index.js",
   "scripts": {
