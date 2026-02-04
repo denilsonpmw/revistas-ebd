@@ -51,15 +51,33 @@ export default function OrderMobilePage() {
     }
   });
 
-  // Query: Buscar período ativo
-  const { data: activePeriod } = useQuery({
+  // Query: Buscar período ativo e calcular dias restantes
+  const { data: periodData } = useQuery({
     queryKey: ['periods', 'active'],
     queryFn: async () => {
       const data = await apiRequest('/periods');
       const periods = data.periods || [];
-      return periods.find(p => p.active); // Corrigido: active em vez de isActive
+      const now = new Date();
+      
+      // Período ativo atual (dentro do intervalo de datas)
+      const activePeriod = periods.find(p => {
+        if (!p.active) return false;
+        const start = new Date(p.startDate);
+        const end = new Date(p.endDate);
+        return now >= start && now <= end;
+      });
+      
+      // Calcular dias restantes
+      const daysRemaining = activePeriod 
+        ? Math.ceil((new Date(activePeriod.endDate) - now) / (1000 * 60 * 60 * 24))
+        : 0;
+      
+      return { activePeriod, daysRemaining };
     }
   });
+
+  const activePeriod = periodData?.activePeriod;
+  const daysRemaining = periodData?.daysRemaining || 0;
 
   // Mutation: Criar pedido
   const createOrderMutation = useMutation({
@@ -321,9 +339,27 @@ export default function OrderMobilePage() {
           </div>
           
           {activePeriod && (
-            <div className="mt-2 bg-emerald-600/10 border border-emerald-600/30 rounded px-3 py-1">
-              <div className="text-emerald-400 text-xs">
-                📅 {activePeriod.name}
+            <div className={`mt-2 rounded px-3 py-1.5 flex items-center justify-between ${
+              daysRemaining <= 7 
+                ? 'bg-orange-600/10 border border-orange-600/30' 
+                : 'bg-emerald-600/10 border border-emerald-600/30'
+            }`}>
+              <div className={`text-xs flex items-center gap-1.5 ${
+                daysRemaining <= 7 ? 'text-orange-400' : 'text-emerald-400'
+              }`}>
+                <span>{daysRemaining <= 7 ? '⏰' : '📅'}</span>
+                <span>{activePeriod.name}</span>
+              </div>
+              <div className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+                daysRemaining <= 7 
+                  ? 'bg-orange-600/20 text-orange-300 border-orange-600/40'
+                  : 'bg-emerald-600/20 text-emerald-300 border-emerald-600/40'
+              }`}>
+                {daysRemaining > 0 ? (
+                  <>Faltam {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}</>
+                ) : (
+                  <>Fecha hoje</>
+                )}
               </div>
             </div>
           )}
