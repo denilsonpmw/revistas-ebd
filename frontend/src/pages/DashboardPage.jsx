@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 const statusPT = {
   PENDING: 'Pendente',
-  APPROVED: 'Aprovado',
+  APPROVED: 'Pago',
   DELIVERED: 'Entregue',
   CANCELED: 'Cancelado'
 };
@@ -38,7 +38,7 @@ export default function DashboardPage() {
             magazineId: item.magazineId,
             quantity: item.quantity
           })),
-          observations: `Duplicado do pedido #${lastOrder.number}`
+          observations: `Duplicado do pedido #${lastOrder.number ? String(lastOrder.number).padStart(4, '0') : lastOrder.id?.slice(0, 8)}`
         })
       }),
     onSuccess: () => {
@@ -266,13 +266,13 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Pedidos Aprovados */}
+        {/* Pedidos Pagos */}
         {approvedOrders > 0 && (
           <div className="rounded-lg border border-blue-800 bg-gradient-to-r from-blue-900/50 to-blue-800/30 p-4 flex items-center gap-3">
             <div className="text-2xl">✅</div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-blue-200 text-sm">
-                {approvedOrders} aprovado(s)
+                {approvedOrders} pago(s)
               </div>
               <div className="text-xs text-blue-300">
                 Em processamento
@@ -320,7 +320,7 @@ export default function DashboardPage() {
           <div className="mt-2 text-3xl font-bold text-yellow-400">{pendingOrders}</div>
         </div>
         <div className="rounded-lg border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-800 p-6">
-          <div className="text-sm text-slate-400">Aprovados</div>
+          <div className="text-sm text-slate-400">Pagos</div>
           <div className="mt-2 text-3xl font-bold text-blue-400">{approvedOrders}</div>
         </div>
         <div className="rounded-lg border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-800 p-6">
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <div className="font-medium text-sm">
-                        Pedido #{order.number}
+                        Pedido #{order.number ? String(order.number).padStart(4, '0') : order.id?.slice(0, 8)}
                       </div>
                       <div className="text-xs text-slate-400 mt-1">
                         {order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0)} unidades • {Number((order.items || []).reduce((sum, item) => sum + Number(item.totalValue || 0), 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}

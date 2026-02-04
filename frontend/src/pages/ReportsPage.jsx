@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext.jsx';
+import { formatCurrency } from '../utils/currency';
 
 const printStyles = `
   @media print {
@@ -288,7 +289,7 @@ export default function ReportsPage() {
               <div className="text-center">
                 <p className="text-xs text-slate-600 uppercase font-semibold">Valor Total</p>
                 <p className="text-2xl font-bold text-emerald-600">
-                  R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrency(totalValue)}
                 </p>
               </div>
             </div>
@@ -300,7 +301,7 @@ export default function ReportsPage() {
                   <div className="bg-slate-200 px-4 py-2 font-bold text-slate-800 flex justify-between items-center">
                     <span>{churchName}</span>
                     <span className="text-sm">
-                      {data.quantity} revistas | R$ {data.total.toFixed(2)}
+                      {data.quantity} revistas | {formatCurrency(data.total)}
                     </span>
                   </div>
                   <table className="w-full text-xs">
@@ -323,10 +324,10 @@ export default function ReportsPage() {
                           <td className="p-2 text-slate-600">{row.variantName || '-'}</td>
                           <td className="p-2 text-center font-semibold">{row.quantity}</td>
                           <td className="p-2 text-right">
-                            R$ {Number(row.unitPrice || (row.totalValue / row.quantity)).toFixed(2)}
+                            {formatCurrency(row.unitPrice || (row.totalValue / row.quantity))}
                           </td>
                           <td className="p-2 text-right font-bold">
-                            R$ {Number(row.totalValue).toFixed(2)}
+                            {formatCurrency(row.totalValue)}
                           </td>
                           <td className="p-2 text-center">
                             <span className={`px-2 py-0.5 rounded text-xs font-semibold ${

@@ -63,8 +63,8 @@ export default function PeriodsPage() {
     createMutation.mutate({
       code: data.code,
       name: data.name,
-      startDate: new Date(data.startDate).toISOString(),
-      endDate: new Date(data.endDate).toISOString()
+      startDate: data.startDate,
+      endDate: data.endDate
     });
   };
 
@@ -151,8 +151,8 @@ export default function PeriodsPage() {
                     {editingId === period.id ? (
                       <input
                         type="date"
-                        value={editData.startDate ? editData.startDate.split('T')[0] : new Date(period.startDate).toISOString().split('T')[0]}
-                        onChange={(e) => setEditData({ ...editData, startDate: new Date(e.target.value).toISOString() })}
+                        value={editData.startDate || new Date(period.startDate).toISOString().split('T')[0]}
+                        onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
                         className="w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
                       />
                     ) : (
@@ -163,8 +163,8 @@ export default function PeriodsPage() {
                     {editingId === period.id ? (
                       <input
                         type="date"
-                        value={editData.endDate ? editData.endDate.split('T')[0] : new Date(period.endDate).toISOString().split('T')[0]}
-                        onChange={(e) => setEditData({ ...editData, endDate: new Date(e.target.value).toISOString() })}
+                        value={editData.endDate || new Date(period.endDate).toISOString().split('T')[0]}
+                        onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
                         className="w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
                       />
                     ) : (
@@ -202,7 +202,11 @@ export default function PeriodsPage() {
                         <button
                           onClick={() => {
                             setEditingId(period.id);
-                            setEditData({ name: period.name, startDate: period.startDate, endDate: period.endDate });
+                            setEditData({ 
+                              name: period.name, 
+                              startDate: new Date(period.startDate).toISOString().split('T')[0], 
+                              endDate: new Date(period.endDate).toISOString().split('T')[0] 
+                            });
                           }}
                           className="text-blue-400 hover:text-blue-300"
                         >

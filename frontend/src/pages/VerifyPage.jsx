@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getToken } from '../api/client';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function VerifyPage() {
   const [searchParams] = useSearchParams();
@@ -11,11 +12,13 @@ export default function VerifyPage() {
   const { loginWithToken, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Se já está logado, redirecionar direto
     if (user) {
-      navigate('/app', { replace: true });
+      const destination = isMobile ? '/pedido-mobile' : '/app';
+      navigate(destination, { replace: true });
       return;
     }
 
@@ -51,7 +54,8 @@ export default function VerifyPage() {
       .then((data) => {
         if (data.token && data.user) {
           loginWithToken(data.token, data.user);
-          navigate('/app');
+          const destination = isMobile ? '/pedido-mobile' : '/app';
+          navigate(destination);
         } else {
           navigate('/login', { replace: true });
         }
@@ -60,7 +64,8 @@ export default function VerifyPage() {
         const message = err.message || '';
         if (message.includes('Token já utilizado') || message.includes('Token expirado')) {
           if (getToken()) {
-            navigate('/app', { replace: true });
+            const destination = isMobile ? '/pedido-mobile' : '/app';
+            navigate(destination, { replace: true });
           } else {
             navigate('/login', { replace: true });
           }
@@ -69,7 +74,7 @@ export default function VerifyPage() {
         toast.error(message || 'Erro ao verificar token');
       })
       .finally(() => setLoading(false));
-  }, [token, attempted, user, navigate]);
+  }, [token, attempted, user, navigate, isMobile]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">

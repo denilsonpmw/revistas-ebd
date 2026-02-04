@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
 import { VariantDisplay } from '../components/VariantSelector';
+import { formatCurrency } from '../utils/currency';
 
 const printStyles = `
   @media print {
@@ -215,7 +216,7 @@ export default function MagazinesCatalogPage() {
                         <div className="text-xs text-slate-700">
                           {mag.variantCombinations.map((combo) => (
                             <div key={combo.id}>
-                              {combo.name}: R$ {Number(combo.price).toFixed(2)}
+                              {combo.name}: {formatCurrency(combo.price)}
                             </div>
                           ))}
                         </div>

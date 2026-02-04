@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { apiRequest } from '../api/client';
+import { formatCurrency } from '../utils/currency';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -41,7 +42,7 @@ export default function DashboardAdminPage() {
 
   const ordersByStatus = [
     { name: 'Pendente', value: pendingOrders, color: '#f59e0b' },
-    { name: 'Aprovado', value: approvedOrders, color: '#3b82f6' },
+    { name: 'Pago', value: approvedOrders, color: '#3b82f6' },
     { name: 'Entregue', value: deliveredOrders, color: '#10b981' },
     { name: 'Cancelado', value: orders.filter(o => o.status === 'CANCELED').length, color: '#ef4444' }
   ].filter(item => item.value > 0);
@@ -174,7 +175,7 @@ export default function DashboardAdminPage() {
                     <td className="p-3">{order.congregation?.name}</td>
                     <td className="p-3">{order.period?.code || 'N/A'}</td>
                     <td className="p-3">{totalQuantity} revista(s)</td>
-                    <td className="p-3">R$ {totalValue.toFixed(2)}</td>
+                    <td className="p-3">{formatCurrency(totalValue)}</td>
                     <td className="p-3">
                       <span className={`rounded px-2 py-1 text-xs font-semibold ${
                         order.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400' :

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+import { Modal } from '../components/Modal';
 
 export default function UsersPage() {
   const queryClient = useQueryClient();
@@ -12,6 +13,7 @@ export default function UsersPage() {
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [selectedUserForReset, setSelectedUserForReset] = useState(null);
   const [resetPassword, setResetPassword] = useState(null);
+  const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -127,9 +129,17 @@ export default function UsersPage() {
   };
 
   const handleDelete = (user) => {
-    if (confirm(`Tem certeza que deseja remover o usuário ${user.name}?`)) {
-      deleteMutation.mutate(user.id);
-    }
+    setConfirmState({
+      isOpen: true,
+      title: 'Remover Usuário',
+      message: `Tem certeza que deseja remover o usuário ${user.name}?`,
+      confirmText: 'Remover',
+      isDangerous: true,
+      onConfirm: () => {
+        setConfirmState(prev => ({ ...prev, isOpen: false }));
+        deleteMutation.mutate(user.id);
+      }
+    });
   };
 
   const handleResetPassword = (user) => {
@@ -525,6 +535,19 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmState.isOpen}
+        title={confirmState.title}
+        message={confirmState.message}
+        type="confirmation"
+        confirmText={confirmState.confirmText || 'Confirmar'}
+        cancelText="Cancelar"
+        isDangerous={confirmState.isDangerous}
+        onConfirm={confirmState.onConfirm}
+        onCancel={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

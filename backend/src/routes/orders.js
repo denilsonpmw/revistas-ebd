@@ -81,12 +81,25 @@ router.post('/', requireRole(['USER', 'MANAGER', 'ADMIN']), async (req, res) => 
       submittedBy: true,
       period: true,
       items: {
-        include: { magazine: true }
+        include: { 
+          magazine: true,
+          variantCombination: true
+        }
       }
     }
   });
 
-  return res.status(201).json({ order });
+  // Serializar Decimais para números
+  const serializedOrder = {
+    ...order,
+    items: order.items.map(item => ({
+      ...item,
+      unitPrice: Number(item.unitPrice),
+      totalValue: Number(item.totalValue)
+    }))
+  };
+
+  return res.status(201).json({ order: serializedOrder });
 });
 
 router.get('/', async (req, res) => {

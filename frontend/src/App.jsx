@@ -13,6 +13,7 @@ import MagazineVariantsPage from './pages/MagazineVariantsPage.jsx';
 import MagazinesCatalogPage from './pages/MagazinesCatalogPage.jsx';
 import PeriodsPage from './pages/PeriodsPage.jsx';
 import UsersPage from './pages/UsersPage.jsx';
+import OrderMobilePage from './pages/OrderMobilePage.jsx';
 import AppLayout from './components/AppLayout.jsx';
 
 function ProtectedRoute({ children }) {
@@ -41,6 +42,15 @@ export default function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/verificar" element={<VerifyPage />} />
+        {/* Rota mobile exclusiva - sem AppLayout */}
+        <Route
+          path="/pedido-mobile"
+          element={
+            <ProtectedRoute>
+              <OrderMobilePage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/app"
           element={

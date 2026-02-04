@@ -2,21 +2,34 @@ const express = require('express');
 const { z } = require('zod');
 const { prisma } = require('../db');
 
+// Helper para normalizar datas vindas do frontend
+// Quando o frontend envia "2024-01-15", precisamos garantir que seja
+// armazenado como meio-dia UTC para evitar problemas de timezone
+const normalizeDate = (dateString) => {
+  if (!dateString) return undefined;
+  // Se já é uma data ISO completa, usa diretamente
+  if (dateString.includes('T')) {
+    return new Date(dateString);
+  }
+  // Se é apenas YYYY-MM-DD, adiciona 12:00:00 UTC
+  return new Date(dateString + 'T12:00:00.000Z');
+};
+
 const router = express.Router();
 
 // Zod validation schemas
 const createPeriodSchema = z.object({
   code: z.string().min(1, 'Código obrigatório'),
   name: z.string().min(1, 'Nome obrigatório'),
-  startDate: z.string().datetime('Data de início inválida'),
-  endDate: z.string().datetime('Data de fim inválida')
+  startDate: z.string().min(1, 'Data de início inválida'),
+  endDate: z.string().min(1, 'Data de fim inválida')
 });
 
 const updatePeriodSchema = z.object({
   code: z.string().min(1).optional(),
   name: z.string().min(1).optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   active: z.boolean().optional()
 });
 
@@ -62,8 +75,8 @@ router.post('/', async (req, res) => {
       data: {
         code: data.code,
         name: data.name,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate)
+        startDate: normalizeDate(data.startDate),
+        endDate: normalizeDate(data.endDate)
       }
     });
 
@@ -89,8 +102,8 @@ router.patch('/:id', async (req, res) => {
     const updateData = {};
     if (data.code) updateData.code = data.code;
     if (data.name) updateData.name = data.name;
-    if (data.startDate) updateData.startDate = new Date(data.startDate);
-    if (data.endDate) updateData.endDate = new Date(data.endDate);
+    if (data.startDate) updateData.startDate = normalizeDate(data.startDate);
+    if (data.endDate) updateData.endDate = normalizeDate(data.endDate);
     if (typeof data.active === 'boolean') updateData.active = data.active;
 
     const period = await prisma.period.update({

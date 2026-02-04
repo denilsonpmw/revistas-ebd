@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
-
+import { formatCurrency } from '../utils/currency';
 export default function MagazineVariantsPage() {
   const [selectedMagazineId, setSelectedMagazineId] = useState(null);
   const [showNewCombo, setShowNewCombo] = useState(false);
@@ -123,7 +123,7 @@ export default function MagazineVariantsPage() {
               <div className="rounded border border-slate-800 bg-slate-900 p-4">
                 <h2 className="text-xl font-bold">{selectedMagazine.name}</h2>
                 <p className="text-sm text-slate-400">Código: {selectedMagazine.code}</p>
-                <p className="text-sm text-slate-400">Preço Base: R$ {Number(selectedMagazine.unitPrice).toFixed(2)}</p>
+                <p className="text-sm text-slate-400">Preço Base: {formatCurrency(selectedMagazine.unitPrice)}</p>
               </div>
 
               {/* Criar Nova Combinação */}
@@ -207,7 +207,7 @@ export default function MagazineVariantsPage() {
                             <h4 className="font-semibold text-lg">{combo.name}</h4>
                             <span className="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">{combo.code}</span>
                           </div>
-                          <p className="text-sm text-slate-400 mt-1">R$ {Number(combo.price).toFixed(2)}</p>
+                          <p className="text-sm text-slate-400 mt-1">{formatCurrency(combo.price)}</p>
                           {combo.variantData && Object.keys(combo.variantData).length > 0 && (
                             <div className="text-xs text-slate-400 mt-2">
                               {Object.entries(combo.variantData).map(([key, value]) => (

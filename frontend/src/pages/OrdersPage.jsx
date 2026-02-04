@@ -4,10 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
 import { VariantSelector, getPriceForCombination } from '../components/VariantSelector';
+import { Modal } from '../components/Modal';
+import { formatCurrency } from '../utils/currency';
 
 const statusPT = {
   PENDING: 'Pendente',
-  APPROVED: 'Aprovado',
+  APPROVED: 'Pago',
   DELIVERED: 'Entregue',
   CANCELED: 'Cancelado'
 };
@@ -103,6 +105,7 @@ export default function OrdersPage() {
   const [editSelectedMagazineId, setEditSelectedMagazineId] = useState('');
   const [editSelectedCombinationId, setEditSelectedCombinationId] = useState(null);
   const [editCurrentUnitPrice, setEditCurrentUnitPrice] = useState(0);
+  const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
   const meQuery = useQuery({
@@ -303,9 +306,6 @@ export default function OrdersPage() {
 
   const totalValue = items.reduce((sum, item) => sum + item.totalValue, 0);
 
-  const formatCurrency = (value) =>
-    Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
   const formatDate = (date) => new Date(date).toLocaleDateString('pt-BR');
 
   // ...existing code...
@@ -409,7 +409,7 @@ export default function OrdersPage() {
                         Variação: <span className="font-semibold">{item.combinationName}</span>
                       </p>
                       <p className="text-slate-400 mt-1">
-                        {item.quantity}x R$ {formatCurrency(item.unitPrice)} = R$ {formatCurrency(item.totalValue)}
+                        {item.quantity}x {formatCurrency(item.unitPrice)} = {formatCurrency(item.totalValue)}
                       </p>
                     </div>
                     <button
@@ -423,7 +423,7 @@ export default function OrdersPage() {
                 ))}
                 <div className="border-t border-slate-700 pt-2">
                   <p className="text-sm font-semibold text-emerald-400">
-                    Total: R$ {formatCurrency(totalValue)}
+                    Total: {formatCurrency(totalValue)}
                   </p>
                 </div>
               </div>
@@ -484,9 +484,17 @@ export default function OrdersPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm('Deseja deletar este pedido? Essa ação não pode ser desfeita.')) {
-                          deleteMutation.mutate(selectedOrderId);
-                        }
+                        setConfirmState({
+                          isOpen: true,
+                          title: 'Deletar Pedido',
+                          message: 'Deseja deletar este pedido? Essa ação não pode ser desfeita.',
+                          confirmText: 'Deletar',
+                          isDangerous: true,
+                          onConfirm: () => {
+                            setConfirmState(prev => ({ ...prev, isOpen: false }));
+                            deleteMutation.mutate(selectedOrderId);
+                          }
+                        });
                       }}
                       disabled={deleteMutation.isPending}
                       className="text-red-400 hover:text-red-300 text-sm font-semibold disabled:opacity-50"
@@ -502,7 +510,7 @@ export default function OrdersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-slate-400">Nº do Pedido</p>
-                  <p className="font-semibold text-emerald-400">#{orderDetailQuery.data.order.number}</p>
+                  <p className="font-semibold text-emerald-400">#{orderDetailQuery.data.order.number ? String(orderDetailQuery.data.order.number).padStart(4, '0') : orderDetailQuery.data.order.id?.slice(0, 8)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-400">Data do Pedido</p>
@@ -570,8 +578,8 @@ export default function OrdersPage() {
                         <span>{item.quantity}x</span>
                       </div>
                       <div className="flex justify-between text-slate-300 mt-1">
-                        <span>R$ {formatCurrency(item.unitPrice)} cada</span>
-                        <span className="font-semibold">R$ {formatCurrency(item.totalValue)}</span>
+                        <span>{formatCurrency(item.unitPrice)} cada</span>
+                        <span className="font-semibold">{formatCurrency(item.totalValue)}</span>
                       </div>
                     </div>
                   ))}
@@ -588,7 +596,7 @@ export default function OrdersPage() {
               <div className="border-t border-slate-700 pt-3 text-right">
                 <p className="text-slate-400 text-xs">Total do Pedido:</p>
                 <p className="text-lg font-bold text-emerald-400">
-                  R$ {formatCurrency(
+                  {formatCurrency(
                     orderDetailQuery.data.order.items?.reduce((sum, item) => sum + Number(item.totalValue), 0) || 0
                   )}
                 </p>
@@ -612,7 +620,7 @@ export default function OrdersPage() {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="font-semibold text-emerald-400">Pedido #{order.number}</p>
+                        <p className="font-semibold text-emerald-400">Pedido #{order.number ? String(order.number).padStart(4, '0') : order.id?.slice(0, 8)}</p>
                         <p className="text-xs text-slate-400">{order.congregation.name}</p>
                         <p className="text-xs text-slate-500">{order.period.code}</p>
                       </div>
@@ -631,7 +639,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="flex justify-between text-xs text-slate-300 mt-2">
                       <span>{order.submittedBy.name}</span>
-                      <span className="font-semibold text-emerald-400">R$ {formatCurrency(itemsTotal)}</span>
+                      <span className="font-semibold text-emerald-400">{formatCurrency(itemsTotal)}</span>
                     </div>
                   </button>
                 );
@@ -651,7 +659,7 @@ export default function OrdersPage() {
         }}>
           <div className="bg-slate-900 rounded-lg border border-slate-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Editar Pedido #{orderDetailQuery.data?.order?.number}</h3>
+              <h3 className="text-lg font-semibold">Editar Pedido #{orderDetailQuery.data?.order?.number ? String(orderDetailQuery.data.order.number).padStart(4, '0') : orderDetailQuery.data?.order?.id?.slice(0, 8)}</h3>
               <button
                 onClick={() => {
                   setEditingOrderId(null);
@@ -784,7 +792,7 @@ export default function OrdersPage() {
                             </p>
                           )}
                           <p className="text-xs text-slate-400 mt-1">
-                            {item.quantity}x R$ {formatCurrency(item.unitPrice)} = <span className="font-semibold text-emerald-400">R$ {formatCurrency(item.totalValue)}</span>
+                            {item.quantity}x {formatCurrency(item.unitPrice)} = <span className="font-semibold text-emerald-400">{formatCurrency(item.totalValue)}</span>
                           </p>
                         </div>
                         <button
@@ -800,7 +808,7 @@ export default function OrdersPage() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-400">Total:</span>
                         <span className="text-lg font-bold text-emerald-400">
-                          R$ {formatCurrency(editItems.reduce((sum, item) => sum + Number(item.totalValue || 0), 0))}
+                          {formatCurrency(editItems.reduce((sum, item) => sum + Number(item.totalValue || 0), 0))}
                         </span>
                       </div>
                     </div>
@@ -851,6 +859,19 @@ export default function OrdersPage() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmState.isOpen}
+        title={confirmState.title}
+        message={confirmState.message}
+        type="confirmation"
+        confirmText={confirmState.confirmText || 'Confirmar'}
+        cancelText="Cancelar"
+        isDangerous={confirmState.isDangerous}
+        onConfirm={confirmState.onConfirm}
+        onCancel={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
     </>
   );
