@@ -23,6 +23,14 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+function MobileRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="p-6">Carregando...</div>;
+  if (!user) return <Navigate to="/" replace />;
+  if (user.role === 'ADMIN') return <Navigate to="/app" replace />;
+  return children;
+}
+
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="p-6">Carregando...</div>;
@@ -46,9 +54,9 @@ export default function App() {
         <Route
           path="/pedido-mobile"
           element={
-            <ProtectedRoute>
+            <MobileRoute>
               <OrderMobilePage />
-            </ProtectedRoute>
+            </MobileRoute>
           }
         />
         <Route

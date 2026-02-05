@@ -17,7 +17,7 @@ export default function VerifyPage() {
   useEffect(() => {
     // Se já está logado, redirecionar direto
     if (user) {
-      const destination = isMobile ? '/pedido-mobile' : '/app';
+      const destination = isMobile && user.role !== 'ADMIN' ? '/pedido-mobile' : '/app';
       navigate(destination, { replace: true });
       return;
     }
