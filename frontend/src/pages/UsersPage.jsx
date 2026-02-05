@@ -175,6 +175,13 @@ export default function UsersPage() {
 
   const displayUsers = showPendingOnly ? pendingUsers : users;
 
+  const congregationsWithUsersCount = new Set(
+    users
+      .filter((user) => user.congregation && !user.congregation.isHeadquarters)
+      .filter((user) => user.congregation?.name !== 'SEDE' && user.congregation?.code !== 'SEDE')
+      .map((user) => user.congregationId)
+  ).size;
+
   const roleLabels = {
     USER: 'Usuário',
     MANAGER: 'Gerente',
@@ -185,9 +192,11 @@ export default function UsersPage() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-slate-100">Gerenciamento de Usuários</h1>
-          <p className="text-slate-400 mt-1">Gerencie os usuários do sistema</p>
+          <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-200 border border-slate-700">
+            {congregationsWithUsersCount} congregação{congregationsWithUsersCount !== 1 ? 's' : ''}
+          </span>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
