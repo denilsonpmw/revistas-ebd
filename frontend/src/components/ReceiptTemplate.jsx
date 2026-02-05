@@ -166,12 +166,12 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
             </div>
 
             {/* Botões de ação */}
-            <div className="space-y-2 pt-2">
+            <div className="grid grid-cols-2 gap-2 pt-2">
               {/* Botão Salvar PDF */}
               <button
                 onClick={handleDownload}
                 className="
-                  w-full bg-emerald-600 hover:bg-emerald-500 
+                  w-full
                   text-white font-semibold 
                   py-3 rounded-lg
                   transition-all duration-200
@@ -179,8 +179,10 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
                   min-h-[44px]
                   flex items-center justify-center gap-2
                 "
+                style={{ backgroundColor: '#FF5C00' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF7A33'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF5C00'}
               >
-                <span>💾</span>
                 Salvar PDF
               </button>
 
@@ -188,7 +190,7 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
               <button
                 onClick={handleShare}
                 className="
-                  w-full bg-blue-600 hover:bg-blue-500 
+                  w-full
                   text-white font-semibold 
                   py-3 rounded-lg
                   transition-all duration-200
@@ -196,8 +198,10 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
                   min-h-[44px]
                   flex items-center justify-center gap-2
                 "
+                style={{ backgroundColor: '#FF5C00' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF7A33'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF5C00'}
               >
-                <span>📤</span>
                 Compartilhar Recibo
               </button>
 
@@ -209,7 +213,7 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
                     onClose(true);
                   }}
                   className="
-                    w-full bg-blue-600 hover:bg-blue-500 
+                    w-full
                     text-white font-semibold 
                     py-3 rounded-lg
                     transition-all duration-200
@@ -217,8 +221,10 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
                     min-h-[44px]
                     flex items-center justify-center gap-2
                   "
+                  style={{ backgroundColor: '#FF5C00' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF7A33'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF5C00'}
                 >
-                  <span>✏️</span>
                   Editar Pedido
                 </button>
               )}
@@ -227,13 +233,16 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
               <button
                 onClick={onClose}
                 className="
-                  w-full bg-slate-700 hover:bg-slate-600 
-                  text-slate-200 font-semibold 
+                  w-full
+                  text-white font-semibold 
                   py-3 rounded-lg
                   transition-all duration-200
                   active:scale-95
                   min-h-[44px]
                 "
+                style={{ backgroundColor: '#FF3F34' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF6057'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF3F34'}
               >
                 Fechar
               </button>
