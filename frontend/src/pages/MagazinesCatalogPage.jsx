@@ -83,8 +83,56 @@ export default function MagazinesCatalogPage() {
     return true;
   });
 
-  const totalRevistas = filteredMagazines.length;
-  const totalAtivas = filteredMagazines.filter(m => m.active).length;
+  const normalizeAgeRange = (ageRange = '') => ageRange.toString().trim();
+
+  const getAgeRangeSortKey = (ageRange) => {
+    const normalized = normalizeAgeRange(ageRange).replace(/\n/g, ' ');
+    if (!normalized) return { group: 0, value: -1 };
+
+    const greaterMatch = normalized.match(/^>\s*(\d+)$/);
+    if (greaterMatch) {
+      return { group: 3, value: Number(greaterMatch[1]) };
+    }
+
+    const plusMatch = normalized.match(/^(\d+)\s*\+$/);
+    if (plusMatch) {
+      return { group: 3, value: Number(plusMatch[1]) };
+    }
+
+    const rangeMatch = normalized.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    if (rangeMatch) {
+      const start = Number(rangeMatch[1]);
+      const end = Number(rangeMatch[2]);
+      const isFullRange = start === 0 && end === 100;
+      return { group: isFullRange ? 1 : 2, value: end };
+    }
+
+    const onlyNumber = normalized.match(/^\d+$/);
+    if (onlyNumber) {
+      return { group: 2, value: Number(onlyNumber[0]) };
+    }
+
+    return { group: 0, value: -1 };
+  };
+
+  const sortedMagazines = [...filteredMagazines].sort((a, b) => {
+    const aKey = getAgeRangeSortKey(a.ageRange);
+    const bKey = getAgeRangeSortKey(b.ageRange);
+
+    if (aKey.group !== bKey.group) return bKey.group - aKey.group;
+    if (aKey.value !== bKey.value) return bKey.value - aKey.value;
+    return a.name.localeCompare(b.name, 'pt-BR');
+  });
+
+  const totalClasses = filteredMagazines.length;
+  const totalVariacoes = filteredMagazines.reduce((sum, mag) => {
+    return sum + (mag.variantCombinations?.length || 0);
+  }, 0);
+  const totalAtivas = filteredMagazines.reduce((sum, mag) => {
+    if (!mag.active) return sum;
+    const variationsCount = mag.variantCombinations?.length || 0;
+    return sum + (variationsCount > 0 ? variationsCount : 1);
+  }, 0);
 
   return (
     <>
@@ -149,17 +197,6 @@ export default function MagazinesCatalogPage() {
             </div>
           </div>
 
-          {/* Cards de Métricas */}
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
-            <div className="rounded-lg border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-800 p-6">
-              <div className="text-sm text-slate-400">Total de Revistas</div>
-              <div className="mt-2 text-3xl font-bold text-emerald-400">{totalRevistas}</div>
-            </div>
-            <div className="rounded-lg border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-800 p-6">
-              <div className="text-sm text-slate-400">Revistas Ativas</div>
-              <div className="mt-2 text-3xl font-bold text-blue-400">{totalAtivas}</div>
-            </div>
-          </div>
           </div>
         </div>
 
@@ -179,10 +216,14 @@ export default function MagazinesCatalogPage() {
             </div>
 
             {/* Resumo */}
-            <div className="grid grid-cols-2 gap-4 mb-6 bg-slate-100 p-4 rounded">
+            <div className="grid grid-cols-3 gap-4 mb-6 bg-slate-100 p-4 rounded">
               <div className="text-center">
-                <p className="text-xs text-slate-600 uppercase font-semibold">Total de Revistas</p>
-                <p className="text-2xl font-bold text-slate-800">{totalRevistas}</p>
+                <p className="text-xs text-slate-600 uppercase font-semibold">Total de Classes</p>
+                <p className="text-2xl font-bold text-slate-800">{totalClasses}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-slate-600 uppercase font-semibold">Total de Variações</p>
+                <p className="text-2xl font-bold text-blue-600">{totalVariacoes}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-slate-600 uppercase font-semibold">Revistas Ativas</p>
@@ -203,7 +244,7 @@ export default function MagazinesCatalogPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredMagazines.map((mag, idx) => (
+                {sortedMagazines.map((mag, idx) => (
                   <tr key={mag.id} className={`border-b border-slate-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}>
                     <td className="p-3">
                       <span className="font-mono font-semibold text-blue-600">{mag.code}</span>
@@ -240,8 +281,8 @@ export default function MagazinesCatalogPage() {
               </tbody>
               <tfoot className="bg-slate-100 border-t-2 border-slate-300">
                 <tr>
-                  <td colSpan="3" className="p-3 font-bold text-right">Total de Revistas:</td>
-                  <td className="p-3 text-right font-bold">{totalRevistas}</td>
+                  <td colSpan="3" className="p-3 font-bold text-right">Total de Classes:</td>
+                  <td className="p-3 text-right font-bold">{totalClasses}</td>
                   <td className="p-3"></td>
                 </tr>
               </tfoot>
