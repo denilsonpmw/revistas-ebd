@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { apiRequest } from '../api/client';
 import { formatCurrency } from '../utils/currency';
+import CongregationManager from '../components/CongregationManager';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export default function DashboardAdminPage() {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const ordersQuery = useQuery({
     queryKey: ['orders'],
     queryFn: () => apiRequest('/orders')
@@ -79,9 +81,39 @@ export default function DashboardAdminPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
+        
+        {/* Tabs de navegação */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`rounded px-4 py-2 text-sm font-semibold ${
+              activeTab === 'dashboard'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('congregations')}
+            className={`rounded px-4 py-2 text-sm font-semibold ${
+              activeTab === 'congregations'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Congregações
+          </button>
+        </div>
+      </div>
 
-      {/* Cards de Métricas */}
+      {activeTab === 'congregations' ? (
+        <CongregationManager />
+      ) : (
+        <>
+          {/* Cards de Métricas */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-lg border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-800 p-6">
           <div className="text-sm text-slate-400">Igrejas</div>
@@ -193,6 +225,8 @@ export default function DashboardAdminPage() {
           </table>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

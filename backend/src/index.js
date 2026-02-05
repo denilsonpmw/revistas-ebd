@@ -49,6 +49,7 @@ if (fs.existsSync(webDist)) {
 }
 
 app.use((err, req, res, next) => {
+  console.error('Erro não tratado:', err.message);
   res.status(500).json({ message: 'Erro interno' });
 });
 

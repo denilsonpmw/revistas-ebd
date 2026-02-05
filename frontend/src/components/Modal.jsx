@@ -1,6 +1,51 @@
 import React from 'react';
 
 /**
+ * FormModal - Modal para formulários e conteúdo customizado
+ */
+export const FormModal = ({ isOpen, title, children, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 bg-black/60 z-50 animate-fade-in"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in">
+        <div 
+          className="w-full max-w-lg bg-slate-900 rounded-lg border border-slate-700 shadow-2xl overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-slate-800 px-6 py-4 flex items-center justify-between border-b border-slate-700">
+            <h3 className="font-bold text-lg text-white">
+              {title}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-4">
+            {children}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+/**
  * Componente Modal reutilizável para confirmações e avisos
  * Funciona tanto em mobile quanto desktop
  */

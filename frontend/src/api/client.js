@@ -24,10 +24,17 @@ export async function apiRequest(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  // Serializar body para JSON se for um objeto
+  const fetchOptions = {
     ...options,
     headers
-  });
+  };
+  
+  if (fetchOptions.body && typeof fetchOptions.body === 'object') {
+    fetchOptions.body = JSON.stringify(fetchOptions.body);
+  }
+
+  const response = await fetch(`${API_URL}${path}`, fetchOptions);
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
