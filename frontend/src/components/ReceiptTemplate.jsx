@@ -6,7 +6,7 @@ import { formatCurrency } from '../utils/currency';
  * Modal de sucesso com recibo do pedido
  * Exibe após a criação bem-sucedida do pedido mobile
  */
-export const ReceiptTemplate = ({ isOpen, onClose, orderData }) => {
+export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
   if (!isOpen || !orderData) return null;
 
   // Calcular total a partir dos items se não existir
@@ -200,6 +200,28 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData }) => {
                 <span>📤</span>
                 Compartilhar Recibo
               </button>
+
+            {/* Botão Editar - Apenas para pedidos PENDENTES */}
+              {onEdit && (orderData.status === 'PENDING' || orderData.status === 'pending') && (
+                <button
+                  onClick={() => {
+                    onEdit();
+                    onClose(true);
+                  }}
+                  className="
+                    w-full bg-blue-600 hover:bg-blue-500 
+                    text-white font-semibold 
+                    py-3 rounded-lg
+                    transition-all duration-200
+                    active:scale-95
+                    min-h-[44px]
+                    flex items-center justify-center gap-2
+                  "
+                >
+                  <span>✏️</span>
+                  Editar Pedido
+                </button>
+              )}
 
               {/* Botão Fechar */}
               <button

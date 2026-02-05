@@ -26,6 +26,7 @@ export default function OrderMobilePage() {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [lastOrderData, setLastOrderData] = useState(null);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDangerous: false });
 
@@ -108,6 +109,43 @@ export default function OrderMobilePage() {
     }
   });
 
+  // Mutation: Atualizar pedido pendente
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ orderId, items }) => {
+      return await apiRequest(`/orders/${orderId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          items: items.map(item => ({
+            magazineId: item.magazineId,
+            combinationId: item.variantId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice
+          }))
+        })
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['orders']);
+      setLastOrderData(data.order);
+      setIsEditingOrder(false);
+      setCart([]);
+      setAlertState({
+        isOpen: true,
+        title: 'Sucesso',
+        message: 'Pedido atualizado com sucesso!',
+        type: 'success'
+      });
+    },
+    onError: (error) => {
+      setAlertState({
+        isOpen: true,
+        title: 'Erro',
+        message: 'Erro ao atualizar pedido: ' + (error.message || 'Erro desconhecido'),
+        type: 'error'
+      });
+    }
+  });
+
   // Handlers
   const handleLogout = () => {
     setConfirmState({
@@ -172,16 +210,18 @@ export default function OrderMobilePage() {
       return;
     }
 
-    // Verificar se há pedido pendente
-    const hasPendingOrder = userOrders.some(order => order.status === 'PENDING');
-    if (hasPendingOrder) {
-      setAlertState({
-        isOpen: true,
-        title: 'Pedido Pendente',
-        message: 'Você não pode fazer um novo pedido enquanto houver um pedido pendente. Aguarde a aprovação do seu pedido anterior ou cancele-o.',
-        type: 'warning'
-      });
-      return;
+    // Verificar se há pedido pendente (apenas se não estiver editando)
+    if (!isEditingOrder) {
+      const hasPendingOrder = userOrders.some(order => order.status === 'PENDING');
+      if (hasPendingOrder) {
+        setAlertState({
+          isOpen: true,
+          title: 'Pedido Pendente',
+          message: 'Você não pode fazer um novo pedido enquanto houver um pedido pendente. Aguarde a aprovação do seu pedido anterior ou cancele-o.',
+          type: 'warning'
+        });
+        return;
+      }
     }
 
     if (!activePeriod) {
@@ -231,14 +271,62 @@ export default function OrderMobilePage() {
     });
   };
 
-  const handleCloseReceipt = () => {
+  const handleCloseReceipt = (keepData = false) => {
+    if (!keepData) {
+      setLastOrderData(null);
+    }
     setIsReceiptModalOpen(false);
-    setLastOrderData(null);
   };
 
   const handleViewOrder = (order) => {
     setLastOrderData(order);
+    setIsEditingOrder(false);
     setIsReceiptModalOpen(true);
+  };
+
+  const handleEditOrder = () => {
+    // Carregar itens do pedido no carrinho
+    const items = lastOrderData.items.map(item => ({
+      magazineId: item.magazineId,
+      variantId: item.combinationId,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice
+    }));
+    setCart(items);
+    setIsReceiptModalOpen(false);
+    setIsEditingOrder(true);
+  };
+
+  const handleSaveEditedOrder = () => {
+    if (cart.length === 0) {
+      setAlertState({
+        isOpen: true,
+        title: 'Aviso',
+        message: 'Adicione pelo menos um item ao pedido',
+        type: 'warning'
+      });
+      return;
+    }
+
+    setConfirmState({
+      isOpen: true,
+      title: 'Atualizar Pedido',
+      message: `Confirmar atualização com ${cart.length} ${cart.length === 1 ? 'item' : 'itens'}?`,
+      confirmText: 'Atualizar',
+      onConfirm: () => {
+        setConfirmState(prev => ({ ...prev, isOpen: false }));
+        updateOrderMutation.mutate({
+          orderId: lastOrderData.id,
+          items: cart
+        });
+      }
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setCart([]);
+    setIsEditingOrder(false);
+    setLastOrderData(null);
   };
 
   // Verifica se revista está no carrinho
@@ -275,6 +363,127 @@ export default function OrderMobilePage() {
       default: return 'Desconhecido';
     }
   };
+
+  // Renderizar interface de edição ou de visualização
+  if (isEditingOrder && lastOrderData && lastOrderData) {
+    return (
+      <div className="min-h-screen bg-slate-950">
+        {/* Header fixo */}
+        <header className="sticky top-0 z-30 bg-slate-900 border-b border-slate-700 shadow-lg">
+          <div className="max-w-md mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-slate-100 font-bold text-lg">
+                  Editando Pedido
+                </h1>
+                <p className="text-slate-400 text-xs">
+                  #{lastOrderData.number ? String(lastOrderData.number).padStart(4, '0') : lastOrderData.id?.slice(0, 8)}
+                </p>
+              </div>
+              <button
+                onClick={handleCancelEdit}
+                className="
+                  bg-slate-800 hover:bg-slate-700
+                  text-slate-300 hover:text-slate-100
+                  px-3 py-2 rounded-lg
+                  transition-all duration-200
+                  text-xs font-semibold
+                  min-h-[44px] min-w-[44px]
+                  flex items-center gap-1
+                "
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" strokeWidth={2} />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 9l-6 6M9 9l6 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Conteúdo principal */}
+        <main className="max-w-md mx-auto px-4 py-4 pb-32">
+          {loadingMagazines ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-slate-400">Carregando revistas...</div>
+            </div>
+          ) : magazines.length === 0 ? (
+            <div className="bg-slate-800 rounded-lg p-6 text-center">
+              <div className="text-slate-400 text-sm">
+                Nenhuma revista cadastrada
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Grid de revistas */}
+              <div className="grid grid-cols-1 gap-3">
+                {magazines.map((magazine) => (
+                  <MagazineCardMobile
+                    key={magazine.id}
+                    magazine={magazine}
+                    onAdd={handleAddMagazine}
+                    isInCart={isInCart(magazine.id)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </main>
+
+        {/* Carrinho flutuante */}
+        <FloatingCart
+          items={cart}
+          onFinalize={handleSaveEditedOrder}
+          hasPendingOrder={false}
+          isEditing={true}
+        />
+
+        {/* Modal de seleção de variações */}
+        <VariantModalMobile
+          isOpen={isVariantModalOpen}
+          onClose={() => setIsVariantModalOpen(false)}
+          magazine={selectedMagazine}
+          onAddToCart={handleAddToCart}
+        />
+
+        {/* Alert Modal */}
+        <Alert
+          isOpen={alertState.isOpen}
+          title={alertState.title}
+          message={alertState.message}
+          type={alertState.type}
+          onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
+        />
+
+        {/* Confirmation Modal */}
+        <Modal
+          isOpen={confirmState.isOpen}
+          title={confirmState.title}
+          message={confirmState.message}
+          type="confirmation"
+          confirmText={confirmState.confirmText || 'Confirmar'}
+          cancelText="Cancelar"
+          isDangerous={confirmState.isDangerous}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+        />
+
+        {/* Loading overlay */}
+        {updateOrderMutation.isPending && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+            <div className="bg-slate-900 rounded-lg p-6">
+              <div className="text-slate-100 font-semibold mb-2">
+                Atualizando pedido...
+              </div>
+              <div className="text-slate-400 text-sm">
+                Aguarde um momento
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -499,11 +708,12 @@ export default function OrderMobilePage() {
         </>
       )}
 
-      {/* Modal de recibo */}
+      {/* Modal de recibo com opção de editar se pendente */}
       <ReceiptTemplate
         isOpen={isReceiptModalOpen}
         onClose={handleCloseReceipt}
         orderData={lastOrderData}
+        onEdit={lastOrderData?.status === 'PENDING' ? handleEditOrder : null}
       />
 
       {/* Loading overlay durante criação do pedido */}

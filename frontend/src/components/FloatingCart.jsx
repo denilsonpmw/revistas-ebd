@@ -5,7 +5,7 @@ import { formatCurrency } from '../utils/currency';
  * Carrinho flutuante fixo no bottom da tela
  * Mostra total de itens e valor total do pedido
  */
-export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false }) => {
+export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, isEditing = false }) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
 
@@ -17,8 +17,17 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false }
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 shadow-2xl z-50 animate-slide-up">
       <div className="max-w-md mx-auto px-4 py-3">
+        {/* Aviso de modo edição */}
+        {isEditing && (
+          <div className="bg-blue-600/20 border border-blue-600/30 rounded px-3 py-2 mb-3">
+            <div className="text-blue-400 text-xs font-semibold">
+              🗒 Editando pedido
+            </div>
+          </div>
+        )}
+
         {/* Aviso de pedido pendente */}
-        {hasPendingOrder && (
+        {hasPendingOrder && !isEditing && (
           <div className="bg-yellow-600/20 border border-yellow-600/30 rounded px-3 py-2 mb-3">
             <div className="text-yellow-400 text-xs font-semibold">
               ⚠️ Você possui um pedido pendente. Aguarde a aprovação antes de fazer um novo.
@@ -51,7 +60,7 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false }
               min-h-[44px]
             "
           >
-            {hasPendingOrder ? 'Pedido Pendente' : 'Finalizar Pedido'}
+            {isEditing ? 'Atualizar Pedido' : hasPendingOrder ? 'Pedido Pendente' : 'Finalizar Pedido'}
           </button>
         </div>
 
