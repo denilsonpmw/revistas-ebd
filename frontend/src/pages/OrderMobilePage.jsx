@@ -285,10 +285,12 @@ export default function OrderMobilePage() {
   };
 
   const handleEditOrder = () => {
-    // Carregar itens do pedido no carrinho
+    // Carregar itens do pedido no carrinho com nomes
     const items = lastOrderData.items.map(item => ({
       magazineId: item.magazineId,
+      magazineName: item.magazine?.name || item.magazineName || 'Revista',
       variantId: item.combinationId,
+      variantName: item.variantCombination?.name || item.variantName || 'Padrão',
       quantity: item.quantity,
       unitPrice: item.unitPrice
     }));
