@@ -400,9 +400,9 @@ export default function OrderMobilePage() {
     setIsReceiptModalOpen(true);
   };
 
-  const handleEditOrder = () => {
-    // Carregar itens do pedido no carrinho com nomes
-    const items = lastOrderData.items.map(item => ({
+  const startEditingOrder = (order) => {
+    if (!order) return;
+    const items = order.items.map(item => ({
       magazineId: item.magazineId,
       magazineName: item.magazine?.name || item.magazineName || 'Revista',
       variantId: item.combinationId || item.variantData?.combinationId || item.variantCombination?.id,
@@ -411,8 +411,13 @@ export default function OrderMobilePage() {
       unitPrice: item.unitPrice
     }));
     setCart(items);
+    setLastOrderData(order);
     setIsReceiptModalOpen(false);
     setIsEditingOrder(true);
+  };
+
+  const handleEditOrder = () => {
+    startEditingOrder(lastOrderData);
   };
 
   const handleSaveEditedOrder = () => {
@@ -538,25 +543,6 @@ export default function OrderMobilePage() {
                   #{lastOrderData.number ? String(lastOrderData.number).padStart(4, '0') : lastOrderData.id?.slice(0, 8)}
                 </p>
               </div>
-              <button
-                onClick={() => setShowChangePassword(true)}
-                className="
-                  bg-blue-600 hover:bg-blue-500
-                  text-white hover:text-slate-50
-                  px-3 py-2 rounded-lg
-                  transition-all duration-200
-                  text-xs font-semibold
-                  min-h-[44px] min-w-[44px]
-                  flex items-center justify-center
-                "
-                title="Alterar Senha"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
-                  <circle cx="12" cy="14" r="1" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
-                </svg>
-              </button>
             </div>
           </div>
         </header>
@@ -883,6 +869,12 @@ export default function OrderMobilePage() {
       <FloatingCart
         items={cart}
         onFinalize={handleFinalize}
+        onPendingOrder={() => {
+          const pendingOrder = userOrders.find(order => order.status === 'PENDING');
+          if (pendingOrder) {
+            startEditingOrder(pendingOrder);
+          }
+        }}
         hasPendingOrder={userOrders.some(order => order.status === 'PENDING')}
       />
 
