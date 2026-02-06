@@ -46,6 +46,17 @@ export const generateReceiptPDF = (orderData) => {
     format: [80, 200] // Largura fixa 80mm, altura ajustável
   });
 
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const pageBottomMargin = 10;
+  const ensurePageSpace = (requiredHeight) => {
+    if (yPosition + requiredHeight > pageHeight - pageBottomMargin) {
+      doc.addPage([80, 200]);
+      yPosition = 10;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+    }
+  };
+
   let yPosition = 10;
 
   // Cabeçalho
@@ -115,6 +126,8 @@ export const generateReceiptPDF = (orderData) => {
 
     // Nome da revista
     const magazineLines = doc.splitTextToSize(magazineName, 70);
+    const itemHeight = (magazineLines.length * 4) + 4 + 6;
+    ensurePageSpace(itemHeight + 2);
     magazineLines.forEach((line) => {
       doc.text(line, 5, yPosition);
       yPosition += 4;
@@ -145,6 +158,7 @@ export const generateReceiptPDF = (orderData) => {
   });
 
   // Linha divisória antes do total
+  ensurePageSpace(10);
   doc.line(5, yPosition, 75, yPosition);
   yPosition += 6;
 
