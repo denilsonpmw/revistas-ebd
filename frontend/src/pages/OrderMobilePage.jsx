@@ -6,6 +6,7 @@ import { apiRequest } from '../api/client';
 import { MagazineCardMobile } from '../components/MagazineCardMobile';
 import { FloatingCart } from '../components/FloatingCart';
 import { VariantModalMobile } from '../components/VariantModalMobile';
+import { CartItemEditorMobile } from '../components/CartItemEditorMobile';
 import { ReceiptTemplate } from '../components/ReceiptTemplate';
 import { Modal, Alert } from '../components/Modal';
 import { formatCurrency } from '../utils/currency';
@@ -27,6 +28,8 @@ export default function OrderMobilePage() {
   const [lastOrderData, setLastOrderData] = useState(null);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [isCartItemEditorOpen, setIsCartItemEditorOpen] = useState(false);
+  const [selectedCartItem, setSelectedCartItem] = useState(null);
   const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDangerous: false });
 
@@ -165,6 +168,32 @@ export default function OrderMobilePage() {
   const handleAddMagazine = (magazine) => {
     setSelectedMagazine(magazine);
     setIsVariantModalOpen(true);
+  };
+
+  const handleEditCartItem = (item, index) => {
+    setSelectedCartItem({ ...item, cartIndex: index });
+    setIsCartItemEditorOpen(true);
+  };
+
+  const handleUpdateCartItem = (updatedItem) => {
+    const index = updatedItem.cartIndex;
+    setCart(prevCart => {
+      const newCart = [...prevCart];
+      newCart[index] = {
+        ...newCart[index],
+        quantity: updatedItem.quantity
+      };
+      return newCart;
+    });
+    setIsCartItemEditorOpen(false);
+    setSelectedCartItem(null);
+  };
+
+  const handleRemoveCartItem = (item) => {
+    const index = item.cartIndex;
+    setCart(prevCart => prevCart.filter((_, i) => i !== index));
+    setIsCartItemEditorOpen(false);
+    setSelectedCartItem(null);
   };
 
   const handleAddToCart = (item) => {
@@ -438,6 +467,7 @@ export default function OrderMobilePage() {
           onFinalize={handleSaveEditedOrder}
           hasPendingOrder={false}
           isEditing={true}
+          onEditItem={handleEditCartItem}
         />
 
         {/* Modal de seleção de variações */}
@@ -446,6 +476,18 @@ export default function OrderMobilePage() {
           onClose={() => setIsVariantModalOpen(false)}
           magazine={selectedMagazine}
           onAddToCart={handleAddToCart}
+        />
+
+        {/* Modal de edição de item do carrinho */}
+        <CartItemEditorMobile
+          isOpen={isCartItemEditorOpen}
+          onClose={() => {
+            setIsCartItemEditorOpen(false);
+            setSelectedCartItem(null);
+          }}
+          item={selectedCartItem}
+          onUpdate={handleUpdateCartItem}
+          onRemove={handleRemoveCartItem}
         />
 
         {/* Alert Modal */}
@@ -507,8 +549,8 @@ export default function OrderMobilePage() {
                 <button
                   onClick={() => setIsOrdersModalOpen(true)}
                   className="
-                    relative bg-slate-800 hover:bg-slate-700
-                    text-slate-300 hover:text-slate-100
+                    relative bg-blue-600 hover:bg-blue-500
+                    text-white hover:text-slate-50
                     px-3 py-2 rounded-lg
                     transition-all duration-200
                     text-xs font-semibold
@@ -530,8 +572,8 @@ export default function OrderMobilePage() {
               <button
                 onClick={handleLogout}
                 className="
-                  bg-slate-800 hover:bg-slate-700
-                  text-slate-300 hover:text-slate-100
+                  bg-red-600 hover:bg-red-500
+                  text-white hover:text-slate-50
                   px-3 py-2 rounded-lg
                   transition-all duration-200
                   text-xs font-semibold
@@ -540,30 +582,32 @@ export default function OrderMobilePage() {
                 "
                 title="Sair"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" strokeWidth={2} />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 9l-6 6M9 9l6 6" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                 </svg>
-                <span className="hidden sm:inline">Sair</span>
               </button>
             </div>
           </div>
           
           {activePeriod && (
             <div className={`mt-2 rounded px-3 py-1.5 flex items-center justify-between ${
-              daysRemaining <= 7 
-                ? 'bg-orange-600/10 border border-orange-600/30' 
+              daysRemaining <= 3
+                ? 'bg-red-600/10 border border-red-600/30'
+                : daysRemaining <= 14
+                ? 'bg-yellow-600/10 border border-yellow-600/30' 
                 : 'bg-emerald-600/10 border border-emerald-600/30'
             }`}>
               <div className={`text-xs flex items-center gap-1.5 ${
-                daysRemaining <= 7 ? 'text-orange-400' : 'text-emerald-400'
+                daysRemaining <= 3 ? 'text-red-400' : daysRemaining <= 14 ? 'text-yellow-400' : 'text-emerald-400'
               }`}>
-                <span>{daysRemaining <= 7 ? '⏰' : '📅'}</span>
+                <span>{daysRemaining <= 3 ? '🚨' : daysRemaining <= 14 ? '⚠️' : '📅'}</span>
                 <span>{activePeriod.name}</span>
               </div>
               <div className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
-                daysRemaining <= 7 
-                  ? 'bg-orange-600/20 text-orange-300 border-orange-600/40'
+                daysRemaining <= 3
+                  ? 'bg-red-600/20 text-red-300 border-red-600/40'
+                  : daysRemaining <= 14 
+                  ? 'bg-yellow-600/20 text-yellow-300 border-yellow-600/40'
                   : 'bg-emerald-600/20 text-emerald-300 border-emerald-600/40'
               }`}>
                 {daysRemaining > 0 ? (

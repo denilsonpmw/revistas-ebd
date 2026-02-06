@@ -5,7 +5,7 @@ import { formatCurrency } from '../utils/currency';
  * Carrinho flutuante fixo no bottom da tela
  * Mostra total de itens e valor total do pedido
  */
-export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, isEditing = false }) => {
+export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, isEditing = false, onEditItem = null }) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
 
@@ -65,17 +65,30 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, 
         </div>
 
         {/* Lista resumida de itens (opcional - exibição compacta) */}
-        <div className="space-y-1 max-h-24 overflow-y-auto">
-          {items.map((item, index) => (
-            <div key={index} className="text-xs text-slate-400 flex justify-between">
-              <span className="truncate flex-1">
-                {item.magazineName} - {item.variantName}
-              </span>
-              <span className="ml-2 text-slate-300">
-                {item.quantity}x
-              </span>
-            </div>
-          ))}
+        <div className="space-y-1 max-h-40 overflow-y-auto">
+          {items.map((item, index) => {
+            const ItemWrapper = isEditing && onEditItem ? 'button' : 'div';
+            return (
+              <ItemWrapper
+                key={index}
+                onClick={isEditing && onEditItem ? () => onEditItem(item, index) : undefined}
+                className={`
+                  text-xs flex justify-between
+                  ${isEditing && onEditItem 
+                    ? 'text-slate-300 hover:text-slate-100 cursor-pointer hover:bg-slate-800 px-2 py-1.5 -mx-2 rounded transition-all duration-200 active:scale-98 w-full text-left'
+                    : 'text-slate-400'
+                  }
+                `}
+              >
+                <span className="truncate flex-1">
+                  {item.magazineName} - {item.variantName}
+                </span>
+                <span className={`ml-2 ${isEditing && onEditItem ? 'text-slate-100 font-semibold' : 'text-slate-300'}`}>
+                  {item.quantity}x {isEditing && onEditItem && '✎'}
+                </span>
+              </ItemWrapper>
+            );
+          })}
         </div>
       </div>
     </div>

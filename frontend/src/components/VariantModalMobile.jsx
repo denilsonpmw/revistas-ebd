@@ -185,7 +185,6 @@ export const VariantModalMobile = ({ isOpen, onClose, magazine, onAddToCart }) =
 
                 <input
                   type="number"
-                  min="1"
                   value={quantity}
                   onChange={handleQuantityChange}
                   className="

@@ -384,7 +384,6 @@ export default function OrdersPage() {
                   type="number"
                   name="quantity"
                   defaultValue="1"
-                  min="1"
                   className="flex-1 rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
                   placeholder="Qtd"
                 />
@@ -717,7 +716,6 @@ export default function OrdersPage() {
                       type="number"
                       name="editQuantity"
                       defaultValue="1"
-                      min="1"
                       className="flex-1 rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
                       placeholder="Qtd"
                     />

@@ -194,13 +194,23 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {/* Período Atual */}
         {currentPeriod && (
-          <div className={`rounded-lg border p-4 flex items-center gap-3 ${daysUntilPeriodEnd <= 7 ? 'border-orange-800 bg-gradient-to-r from-orange-900/50 to-orange-800/30' : 'border-emerald-800 bg-gradient-to-r from-emerald-900/50 to-emerald-800/30'}`}>
-            <div className="text-2xl">{daysUntilPeriodEnd <= 7 ? '⏰' : '📅'}</div>
+          <div className={`rounded-lg border p-4 flex items-center gap-3 ${
+            daysUntilPeriodEnd <= 3
+              ? 'border-red-800 bg-gradient-to-r from-red-900/50 to-red-800/30'
+              : daysUntilPeriodEnd <= 14
+              ? 'border-yellow-800 bg-gradient-to-r from-yellow-900/50 to-yellow-800/30'
+              : 'border-emerald-800 bg-gradient-to-r from-emerald-900/50 to-emerald-800/30'
+          }`}>
+            <div className="text-2xl">{daysUntilPeriodEnd <= 3 ? '🚨' : daysUntilPeriodEnd <= 14 ? '⚠️' : '📅'}</div>
             <div className="flex-1 min-w-0">
-              <div className={`font-semibold text-sm ${daysUntilPeriodEnd <= 7 ? 'text-orange-200' : 'text-emerald-200'}`}>
-                {daysUntilPeriodEnd <= 7 ? 'Encerrando em breve' : 'Período aberto'}
+              <div className={`font-semibold text-sm ${
+                daysUntilPeriodEnd <= 3 ? 'text-red-200' : daysUntilPeriodEnd <= 14 ? 'text-yellow-200' : 'text-emerald-200'
+              }`}>
+                {daysUntilPeriodEnd <= 3 ? 'Urgente! Encerrando' : daysUntilPeriodEnd <= 14 ? 'Encerrando em breve' : 'Período aberto'}
               </div>
-              <div className={`text-xs ${daysUntilPeriodEnd <= 7 ? 'text-orange-300' : 'text-emerald-300'}`}>
+              <div className={`text-xs ${
+                daysUntilPeriodEnd <= 3 ? 'text-red-300' : daysUntilPeriodEnd <= 14 ? 'text-yellow-300' : 'text-emerald-300'
+              }`}>
                 {daysUntilPeriodEnd > 0 ? (
                   <>{daysUntilPeriodEnd} {daysUntilPeriodEnd === 1 ? 'dia' : 'dias'} restantes</>
                 ) : (
