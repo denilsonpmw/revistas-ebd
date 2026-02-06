@@ -131,11 +131,29 @@ export default function ReportsPage() {
       o.congregationId === user?.congregationId
     );
 
+    const normalizeStatus = (status) => String(status || '').toUpperCase();
+    const pickStatus = (current, next) => {
+      const currentKey = normalizeStatus(current);
+      const nextKey = normalizeStatus(next);
+      if (currentKey === 'PENDING' || nextKey === 'PENDING') return 'PENDING';
+      return currentKey || nextKey || 'PENDING';
+    };
+
     // Converte orders para formato de rows incluindo variações
     const rowsMap = new Map();
     for (const order of myOrders) {
       for (const item of order.items || []) {
-        const key = `${item.magazineId}-${item.combinationId || 'no-variant'}`;
+        const variantIdKey = item.combinationId
+          || item.variantCombination?.id
+          || item.variantData?.combinationId
+          || item.variantData?.combinationCode
+          || item.variantCombination?.code
+          || item.variantCode
+          || item.variantCombination?.name
+          || item.variantData?.combinationName
+          || item.variantName
+          || 'no-variant';
+        const key = `${item.magazineId}-${variantIdKey}`;
         if (!rowsMap.has(key)) {
           rowsMap.set(key, {
             congregationId: order.congregationId,
@@ -143,15 +161,22 @@ export default function ReportsPage() {
             magazineCode: item.magazine?.code || '',
             magazineName: item.magazine?.name || '',
             className: item.magazine?.className || '',
-            variantCode: item.variantCombination?.code || item.variantData?.combinationCode || '-',
-            variantName: item.variantCombination?.name || item.variantData?.combinationName || 'Sem variação',
-            status: order.status,
+            variantCode: item.variantCombination?.code || item.variantData?.combinationCode || item.variantCode || '-',
+            variantName: item.variantCombination?.name || item.variantData?.combinationName || item.variantName || 'Sem variação',
+            status: normalizeStatus(order.status),
             quantity: 0,
             unitPrice: Number(item.unitPrice || 0),
             totalValue: 0
           });
         }
         const entry = rowsMap.get(key);
+        entry.status = pickStatus(entry.status, order.status);
+        if (entry.variantCode === '-' || !entry.variantCode) {
+          entry.variantCode = item.variantCombination?.code || item.variantData?.combinationCode || entry.variantCode;
+        }
+        if (entry.variantName === 'Sem variação' || !entry.variantName) {
+          entry.variantName = item.variantCombination?.name || item.variantData?.combinationName || entry.variantName;
+        }
         entry.quantity += item.quantity || 0;
         entry.totalValue += Number(item.totalValue || 0);
       }
