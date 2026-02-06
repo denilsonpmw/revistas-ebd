@@ -120,9 +120,8 @@ export default function OrderMobilePage() {
         body: JSON.stringify({
           items: items.map(item => ({
             magazineId: item.magazineId,
-            combinationId: item.variantId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice
+            combinationId: item.combinationId || item.variantId,
+            quantity: item.quantity
           }))
         })
       });
@@ -318,8 +317,8 @@ export default function OrderMobilePage() {
     const items = lastOrderData.items.map(item => ({
       magazineId: item.magazineId,
       magazineName: item.magazine?.name || item.magazineName || 'Revista',
-      variantId: item.combinationId,
-      variantName: item.variantCombination?.name || item.variantName || 'Padrão',
+      variantId: item.combinationId || item.variantData?.combinationId || item.variantCombination?.id,
+      variantName: item.variantCombination?.name || item.variantData?.combinationName || item.variantData?.name || item.combinationName || item.variantName || 'Padrão',
       quantity: item.quantity,
       unitPrice: item.unitPrice
     }));
@@ -339,18 +338,58 @@ export default function OrderMobilePage() {
       return;
     }
 
-    setConfirmState({
-      isOpen: true,
-      title: 'Atualizar Pedido',
-      message: `Confirmar atualização com ${cart.length} ${cart.length === 1 ? 'item' : 'itens'}?`,
-      confirmText: 'Atualizar',
-      onConfirm: () => {
-        setConfirmState(prev => ({ ...prev, isOpen: false }));
-        updateOrderMutation.mutate({
-          orderId: lastOrderData.id,
-          items: cart
-        });
+    const resolveCombinationId = (item) => {
+      const directId = item.variantId || item.combinationId || item.variantData?.combinationId || item.variantCombination?.id;
+      if (directId) return directId;
+
+      const magazine = magazines.find(m => m.id === item.magazineId);
+      if (!magazine) return null;
+
+      const byNameOrCode = magazine.variantCombinations?.find(vc =>
+        vc.name === item.variantName || vc.code === item.variantCode || vc.name === item.variantCombination?.name
+      );
+      if (byNameOrCode) return byNameOrCode.id;
+
+      if (magazine.variantCombinations?.length === 1) {
+        return magazine.variantCombinations[0].id;
       }
+
+      return null;
+    };
+
+    const normalizedItems = cart.map(item => ({
+      ...item,
+      combinationId: resolveCombinationId(item),
+      quantity: Number(item.quantity)
+    }));
+
+    const hasInvalidQuantity = normalizedItems.some(item => !Number.isInteger(item.quantity) || item.quantity < 1);
+    const hasMissingCombination = normalizedItems.some(item => !item.combinationId);
+
+    if (hasInvalidQuantity) {
+      setAlertState({
+        isOpen: true,
+        title: 'Aviso',
+        message: 'Todas as quantidades devem ser números inteiros maiores que 0',
+        type: 'warning'
+      });
+      return;
+    }
+
+    if (hasMissingCombination) {
+      setAlertState({
+        isOpen: true,
+        title: 'Aviso',
+        message: 'Selecione uma variação válida para todos os itens',
+        type: 'warning'
+      });
+      return;
+    }
+
+    // Atualizar pedido diretamente sem confirmação
+    updateOrderMutation.mutate({
+      orderId: lastOrderData.id,
+      items: normalizedItems
     });
   };
 
@@ -411,23 +450,6 @@ export default function OrderMobilePage() {
                   #{lastOrderData.number ? String(lastOrderData.number).padStart(4, '0') : lastOrderData.id?.slice(0, 8)}
                 </p>
               </div>
-              <button
-                onClick={handleCancelEdit}
-                className="
-                  bg-slate-800 hover:bg-slate-700
-                  text-slate-300 hover:text-slate-100
-                  px-3 py-2 rounded-lg
-                  transition-all duration-200
-                  text-xs font-semibold
-                  min-h-[44px] min-w-[44px]
-                  flex items-center gap-1
-                "
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" strokeWidth={2} />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 9l-6 6M9 9l6 6" />
-                </svg>
-              </button>
             </div>
           </div>
         </header>
@@ -468,6 +490,7 @@ export default function OrderMobilePage() {
           hasPendingOrder={false}
           isEditing={true}
           onEditItem={handleEditCartItem}
+          onCancelEdit={handleCancelEdit}
         />
 
         {/* Modal de seleção de variações */}

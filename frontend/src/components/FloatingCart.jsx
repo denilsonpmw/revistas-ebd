@@ -5,7 +5,7 @@ import { formatCurrency } from '../utils/currency';
  * Carrinho flutuante fixo no bottom da tela
  * Mostra total de itens e valor total do pedido
  */
-export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, isEditing = false, onEditItem = null }) => {
+export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, isEditing = false, onEditItem = null, onCancelEdit = null }) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
 
@@ -46,26 +46,45 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, 
             </div>
           </div>
 
-          {/* Botão Finalizar */}
-          <button
-            onClick={onFinalize}
-            disabled={hasPendingOrder}
-            className="
-              bg-emerald-600 hover:bg-emerald-500 
-              disabled:bg-slate-700 disabled:cursor-not-allowed
-              text-white font-bold 
-              px-6 py-3 rounded-lg
-              transition-all duration-200
-              active:scale-95 shadow-lg
-              min-h-[44px]
-            "
-          >
-            {isEditing ? 'Atualizar Pedido' : hasPendingOrder ? 'Pedido Pendente' : 'Finalizar Pedido'}
-          </button>
+          {/* Botões de ação */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onFinalize}
+              disabled={hasPendingOrder}
+              className="
+                bg-emerald-600 hover:bg-emerald-500 
+                disabled:bg-slate-700 disabled:cursor-not-allowed
+                text-white font-bold 
+                px-6 py-3 rounded-lg
+                transition-all duration-200
+                active:scale-95 shadow-lg
+                min-h-[44px]
+              "
+            >
+              {isEditing ? 'Atualizar Pedido' : hasPendingOrder ? 'Pedido Pendente' : 'Finalizar Pedido'}
+            </button>
+            {isEditing && onCancelEdit && (
+              <button
+                onClick={onCancelEdit}
+                className="
+                  bg-red-600 hover:bg-red-500
+                  text-white font-bold
+                  px-4 py-3 rounded-lg
+                  transition-all duration-200
+                  active:scale-95 shadow-lg
+                  min-h-[44px]
+                "
+                aria-label="Fechar edição"
+                title="Fechar"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Lista resumida de itens (opcional - exibição compacta) */}
-        <div className="space-y-1 max-h-40 overflow-y-auto">
+        <div className="space-y-1 max-h-64 overflow-y-auto">
           {items.map((item, index) => {
             const ItemWrapper = isEditing && onEditItem ? 'button' : 'div';
             return (
@@ -81,7 +100,7 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, 
                 `}
               >
                 <span className="truncate flex-1">
-                  {item.magazineName} - {item.variantName}
+                  {item.magazineName} - {item.variantName || item.variantData?.combinationName || item.variantData?.name || 'Padrão'}
                 </span>
                 <span className={`ml-2 ${isEditing && onEditItem ? 'text-slate-100 font-semibold' : 'text-slate-300'}`}>
                   {item.quantity}x {isEditing && onEditItem && '✎'}

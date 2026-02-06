@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert } from './Modal';
 import { formatCurrency } from '../utils/currency';
 
@@ -10,6 +10,12 @@ export const CartItemEditorMobile = ({ isOpen, onClose, item, onUpdate, onRemove
   const originalQuantity = item?.quantity || 1;
   const [delta, setDelta] = useState(0);
   const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
+
+  useEffect(() => {
+    if (isOpen) {
+      setDelta(0);
+    }
+  }, [isOpen, item?.magazineId, item?.variantId]);
 
   if (!isOpen || !item) return null;
 

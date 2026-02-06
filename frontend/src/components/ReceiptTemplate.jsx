@@ -53,26 +53,18 @@ export const ReceiptTemplate = ({ isOpen, onClose, orderData, onEdit }) => {
         <div className="bg-slate-900 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in">
           {/* Header */}
           <div className="sticky top-0 bg-slate-900 border-b border-slate-700 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-2xl">✓</span>
-                </div>
-                <div>
-                  <h3 className="text-slate-100 font-bold text-lg">
-                    Pedido Realizado!
-                  </h3>
-                  <p className="text-slate-400 text-sm">
-                    #{orderData.number ? String(orderData.number).padStart(4, '0') : orderData.id?.slice(0, 8) || 'N/A'}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-2xl">✓</span>
               </div>
-              <button
-                onClick={onClose}
-                className="text-slate-400 hover:text-slate-100 p-2 -mr-2 min-h-[44px] min-w-[44px]"
-              >
-                ✕
-              </button>
+              <div>
+                <h3 className="text-slate-100 font-bold text-lg">
+                  Pedido Realizado!
+                </h3>
+                <p className="text-slate-400 text-sm">
+                  #{orderData.number ? String(orderData.number).padStart(4, '0') : orderData.id?.slice(0, 8) || 'N/A'}
+                </p>
+              </div>
             </div>
           </div>
 
