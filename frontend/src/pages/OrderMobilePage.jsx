@@ -551,7 +551,11 @@ export default function OrderMobilePage() {
                 "
                 title="Alterar Senha"
               >
-                🔐
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+                  <circle cx="12" cy="14" r="1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
+                </svg>
               </button>
             </div>
           </div>
@@ -754,8 +758,8 @@ export default function OrderMobilePage() {
                 <button
                   onClick={() => setIsOrdersModalOpen(true)}
                   className="
-                    relative bg-blue-600 hover:bg-blue-500
-                    text-white hover:text-slate-50
+                    relative bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+                    text-slate-100 hover:text-slate-50
                     px-3 py-2 rounded-lg
                     transition-all duration-200
                     text-xs font-semibold
@@ -776,8 +780,8 @@ export default function OrderMobilePage() {
               <button
                 onClick={() => setShowChangePassword(true)}
                 className="
-                  bg-blue-600 hover:bg-blue-500
-                  text-white hover:text-slate-50
+                  bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+                  text-slate-100 hover:text-slate-50
                   px-3 py-2 rounded-lg
                   transition-all duration-200
                   text-xs font-semibold
@@ -786,14 +790,18 @@ export default function OrderMobilePage() {
                 "
                 title="Alterar Senha"
               >
-                🔐
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+                  <circle cx="12" cy="14" r="1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
+                </svg>
               </button>
 
               {/* Botão Logout */}
               <button
                 onClick={handleLogout}
                 className="
-                  bg-red-600 hover:bg-red-500
+                  bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
                   text-white hover:text-slate-50
                   px-3 py-2 rounded-lg
                   transition-all duration-200
