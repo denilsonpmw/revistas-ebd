@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getToken } from '../api/client';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function VerifyPage() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const location = useLocation();
+  const token = useMemo(() => {
+    const params = new URLSearchParams(location.search || '');
+    return params.get('token');
+  }, [location.search]);
   const navigate = useNavigate();
   const { loginWithToken, user } = useAuth();
   const [loading, setLoading] = useState(false);
