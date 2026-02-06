@@ -93,12 +93,20 @@
   color: #065f46 !important;
 }
 
+:root[data-theme="light"] .text-emerald-200 {
+  color: #064e3b !important;
+}
+
 :root[data-theme="light"] .text-yellow-400 {
   color: #b45309 !important;
 }
 
 :root[data-theme="light"] .text-yellow-300 {
   color: #92400e !important;
+}
+
+:root[data-theme="light"] .text-yellow-200 {
+  color: #78350f !important;
 }
 
 :root[data-theme="light"] .text-blue-400 {
@@ -109,12 +117,108 @@
   color: #1e40af !important;
 }
 
+:root[data-theme="light"] .text-blue-200 {
+  color: #1e3a8a !important;
+}
+
 :root[data-theme="light"] .text-red-400 {
   color: #b91c1c !important;
 }
 
 :root[data-theme="light"] .text-red-300 {
   color: #991b1b !important;
+}
+
+:root[data-theme="light"] .text-red-200 {
+  color: #7f1d1d !important;
+}
+
+:root[data-theme="light"] .text-green-300 {
+  color: #166534 !important;
+}
+
+:root[data-theme="light"] .text-green-200 {
+  color: #14532d !important;
+}
+
+:root[data-theme="light"] .border-emerald-800 {
+  border-color: #34d399 !important;
+}
+
+:root[data-theme="light"] .border-yellow-800 {
+  border-color: #f59e0b !important;
+}
+
+:root[data-theme="light"] .border-blue-800 {
+  border-color: #2563eb !important;
+}
+
+:root[data-theme="light"] .border-red-800 {
+  border-color: #ef4444 !important;
+}
+
+:root[data-theme="light"] .border-green-800 {
+  border-color: #22c55e !important;
+}
+
+:root[data-theme="light"] .from-emerald-900\/50 {
+  --tw-gradient-from: rgba(16, 185, 129, 0.2) !important;
+  --tw-gradient-to: rgba(16, 185, 129, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme="light"] .to-emerald-800\/30 {
+  --tw-gradient-to: rgba(16, 185, 129, 0.1) !important;
+}
+
+:root[data-theme="light"] .from-yellow-900\/50 {
+  --tw-gradient-from: rgba(234, 179, 8, 0.2) !important;
+  --tw-gradient-to: rgba(234, 179, 8, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme="light"] .to-yellow-800\/30 {
+  --tw-gradient-to: rgba(234, 179, 8, 0.1) !important;
+}
+
+:root[data-theme="light"] .from-blue-900\/50 {
+  --tw-gradient-from: rgba(37, 99, 235, 0.2) !important;
+  --tw-gradient-to: rgba(37, 99, 235, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme="light"] .to-blue-800\/30 {
+  --tw-gradient-to: rgba(37, 99, 235, 0.1) !important;
+}
+
+:root[data-theme="light"] .from-red-900\/50 {
+  --tw-gradient-from: rgba(220, 38, 38, 0.2) !important;
+  --tw-gradient-to: rgba(220, 38, 38, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme="light"] .to-red-800\/30 {
+  --tw-gradient-to: rgba(220, 38, 38, 0.1) !important;
+}
+
+:root[data-theme="light"] .from-green-900\/50 {
+  --tw-gradient-from: rgba(34, 197, 94, 0.2) !important;
+  --tw-gradient-to: rgba(34, 197, 94, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme="light"] .to-green-800\/30 {
+  --tw-gradient-to: rgba(34, 197, 94, 0.1) !important;
+}
+
+:root[data-theme="light"] .from-slate-900 {
+  --tw-gradient-from: #f1f5f9 !important;
+  --tw-gradient-to: rgba(241, 245, 249, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root[data-theme="light"] .to-slate-800 {
+  --tw-gradient-to: #e2e8f0 !important;
 }
 
 :root[data-theme="light"] .bg-emerald-600\/10 {
