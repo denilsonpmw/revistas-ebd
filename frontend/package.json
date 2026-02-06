@@ -1,6 +1,6 @@
 {
   "name": "revistas-ebd-web",
-  "version": "1.02.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
