@@ -44,6 +44,47 @@ export default function OrderMobilePage() {
     }
   });
 
+  const normalizeAgeRange = (ageRange = '') => ageRange.toString().trim();
+
+  const getAgeRangeSortKey = (ageRange) => {
+    const normalized = normalizeAgeRange(ageRange).replace(/\n/g, ' ');
+    if (!normalized) return { group: 0, value: -1 };
+
+    const greaterMatch = normalized.match(/^>\s*(\d+)$/);
+    if (greaterMatch) {
+      return { group: 3, value: Number(greaterMatch[1]) };
+    }
+
+    const plusMatch = normalized.match(/^(\d+)\s*\+$/);
+    if (plusMatch) {
+      return { group: 3, value: Number(plusMatch[1]) };
+    }
+
+    const rangeMatch = normalized.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    if (rangeMatch) {
+      const start = Number(rangeMatch[1]);
+      const end = Number(rangeMatch[2]);
+      const isFullRange = start === 0 && end === 100;
+      return { group: isFullRange ? 1 : 2, value: end };
+    }
+
+    const onlyNumber = normalized.match(/^\d+$/);
+    if (onlyNumber) {
+      return { group: 2, value: Number(onlyNumber[0]) };
+    }
+
+    return { group: 0, value: -1 };
+  };
+
+  const sortedMagazines = [...magazines].sort((a, b) => {
+    const aKey = getAgeRangeSortKey(a.ageRange);
+    const bKey = getAgeRangeSortKey(b.ageRange);
+
+    if (aKey.group !== bKey.group) return bKey.group - aKey.group;
+    if (aKey.value !== bKey.value) return bKey.value - aKey.value;
+    return a.name.localeCompare(b.name, 'pt-BR');
+  });
+
   // Query: Buscar pedidos do usuário
   const { data: userOrders = [] } = useQuery({
     queryKey: ['orders', 'user'],
@@ -470,7 +511,7 @@ export default function OrderMobilePage() {
             <>
               {/* Grid de revistas */}
               <div className="grid grid-cols-1 gap-3">
-                {magazines.map((magazine) => (
+                {sortedMagazines.map((magazine) => (
                   <MagazineCardMobile
                     key={magazine.id}
                     magazine={magazine}
@@ -660,7 +701,7 @@ export default function OrderMobilePage() {
           <>
             {/* Grid de revistas */}
             <div className="grid grid-cols-1 gap-3">
-              {magazines.map((magazine) => (
+              {sortedMagazines.map((magazine) => (
                 <MagazineCardMobile
                   key={magazine.id}
                   magazine={magazine}
