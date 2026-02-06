@@ -39,6 +39,25 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-16">
+        <div className="relative -mx-4 -mt-16 mb-2">
+          <div className="relative h-28 w-full">
+            <svg
+              viewBox="0 0 375 180"
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute inset-0 h-full w-full"
+              preserveAspectRatio="none"
+            >
+              <rect width="375" height="180" fill="#0f172a" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img
+                src="/logo-original.svg"
+                alt="Revistas EBD"
+                className="h-20 w-20"
+              />
+            </div>
+          </div>
+        </div>
         <h1 className="text-2xl font-semibold">Acesso Revistas EBD</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div>
