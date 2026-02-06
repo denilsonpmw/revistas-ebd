@@ -11,6 +11,7 @@ import { CartItemEditorMobile } from '../components/CartItemEditorMobile';
 import { ReceiptTemplate } from '../components/ReceiptTemplate';
 import { Modal, Alert } from '../components/Modal';
 import { formatCurrency } from '../utils/currency';
+import ThemeToggle from '../components/ThemeToggle.jsx';
 
 /**
  * Página de pedidos mobile - PDV style
@@ -35,6 +36,7 @@ export default function OrderMobilePage() {
   const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDangerous: false });
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const footerActionsHeight = 56;
 
   // Query: Buscar revistas ativas
   const { data: magazines = [], isLoading: loadingMagazines } = useQuery({
@@ -548,7 +550,7 @@ export default function OrderMobilePage() {
         </header>
 
         {/* Conteúdo principal */}
-        <main className="max-w-md mx-auto px-4 py-4 pb-32">
+        <main className="max-w-md mx-auto px-4 py-4 pb-40">
           {loadingMagazines ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-slate-400">Carregando revistas...</div>
@@ -584,7 +586,76 @@ export default function OrderMobilePage() {
           isEditing={true}
           onEditItem={handleEditCartItem}
           onCancelEdit={handleCancelEdit}
+          bottomOffset={footerActionsHeight}
         />
+
+        {/* Ações no rodapé */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
+          <div className="max-w-md mx-auto flex items-center gap-2 px-4 py-2">
+            <button
+              onClick={() => setIsOrdersModalOpen(true)}
+              disabled={userOrders.length === 0}
+              className="
+                relative bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+                text-slate-100 hover:text-slate-50
+                px-3 py-2 rounded-lg
+                transition-all duration-200
+                text-xs font-semibold
+                min-h-[44px] min-w-[44px]
+                flex items-center justify-center
+                disabled:opacity-50 disabled:cursor-not-allowed
+              "
+              title="Meus Pedidos"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {userOrders.length > 0 && (
+                <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+                  {userOrders.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setShowChangePassword(true)}
+              className="
+                bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+                text-slate-100 hover:text-slate-50
+                px-3 py-2 rounded-lg
+                transition-all duration-200
+                text-xs font-semibold
+                min-h-[44px] min-w-[44px]
+                flex items-center justify-center
+              "
+              title="Alterar Senha"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+                <circle cx="12" cy="14" r="1" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
+              </svg>
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="
+                bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
+                text-white hover:text-slate-50
+                px-3 py-2 rounded-lg
+                transition-all duration-200
+                text-xs font-semibold
+                min-h-[44px] min-w-[44px]
+                flex items-center justify-center
+              "
+              title="Sair"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
         {/* Modal de seleção de variações */}
         <VariantModalMobile
@@ -739,71 +810,10 @@ export default function OrderMobilePage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Ícone de Pedidos Recentes */}
-              {userOrders.length > 0 && (
-                <button
-                  onClick={() => setIsOrdersModalOpen(true)}
-                  className="
-                    relative bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
-                    text-slate-100 hover:text-slate-50
-                    px-3 py-2 rounded-lg
-                    transition-all duration-200
-                    text-xs font-semibold
-                    min-h-[44px] min-w-[44px]
-                    flex items-center justify-center
-                  "
-                  title="Meus Pedidos"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
-                    {userOrders.length}
-                  </span>
-                </button>
-              )}
-
-              <button
-                onClick={() => setShowChangePassword(true)}
-                className="
-                  bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
-                  text-slate-100 hover:text-slate-50
-                  px-3 py-2 rounded-lg
-                  transition-all duration-200
-                  text-xs font-semibold
-                  min-h-[44px] min-w-[44px]
-                  flex items-center justify-center
-                "
-                title="Alterar Senha"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
-                  <circle cx="12" cy="14" r="1" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
-                </svg>
-              </button>
-
-              {/* Botão Logout */}
-              <button
-                onClick={handleLogout}
-                className="
-                  bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
-                  text-white hover:text-slate-50
-                  px-3 py-2 rounded-lg
-                  transition-all duration-200
-                  text-xs font-semibold
-                  min-h-[44px] min-w-[44px]
-                  flex items-center gap-1
-                "
-                title="Sair"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                </svg>
-              </button>
+              <ThemeToggle className="min-h-[44px]" />
             </div>
           </div>
-          
+
           {activePeriod && (
             <div className={`mt-2 rounded px-3 py-1.5 flex items-center justify-between ${
               daysRemaining <= 3
@@ -837,7 +847,7 @@ export default function OrderMobilePage() {
       </header>
 
       {/* Conteúdo principal */}
-      <main className="max-w-md mx-auto px-4 py-4 pb-32">
+      <main className="max-w-md mx-auto px-4 py-4 pb-40">
         {loadingMagazines ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-slate-400">Carregando revistas...</div>
@@ -876,7 +886,76 @@ export default function OrderMobilePage() {
           }
         }}
         hasPendingOrder={userOrders.some(order => order.status === 'PENDING')}
+        bottomOffset={footerActionsHeight}
       />
+
+      {/* Ações no rodapé */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
+        <div className="max-w-md mx-auto flex items-center gap-2 px-4 py-2">
+          <button
+            onClick={() => setIsOrdersModalOpen(true)}
+            disabled={userOrders.length === 0}
+            className="
+              relative bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+              text-slate-100 hover:text-slate-50
+              px-3 py-2 rounded-lg
+              transition-all duration-200
+              text-xs font-semibold
+              min-h-[44px] min-w-[44px]
+              flex items-center justify-center
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
+            title="Meus Pedidos"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {userOrders.length > 0 && (
+              <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+                {userOrders.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowChangePassword(true)}
+            className="
+              bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+              text-slate-100 hover:text-slate-50
+              px-3 py-2 rounded-lg
+              transition-all duration-200
+              text-xs font-semibold
+              min-h-[44px] min-w-[44px]
+              flex items-center justify-center
+            "
+            title="Alterar Senha"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+              <circle cx="12" cy="14" r="1" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
+            </svg>
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="
+              bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
+              text-slate-100 hover:text-slate-50
+              px-3 py-2 rounded-lg
+              transition-all duration-200
+              text-xs font-semibold
+              min-h-[44px] min-w-[44px]
+              flex items-center justify-center
+            "
+            title="Sair"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       {/* Modal de seleção de variações */}
       <VariantModalMobile

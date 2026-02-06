@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+import ThemeToggle from '../components/ThemeToggle.jsx';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -44,7 +45,10 @@ export default function RegisterPage() {
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="mx-auto flex max-w-md flex-col gap-6">
+        <div className="mx-auto flex max-w-md flex-col gap-6 w-full">
+          <div className="flex items-center justify-end">
+            <ThemeToggle />
+          </div>
           <div className="text-center">
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500/20 mb-4">
               <svg className="h-8 w-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,6 +79,9 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-16">
+        <div className="flex items-center justify-end">
+          <ThemeToggle />
+        </div>
         <h1 className="text-2xl font-semibold">Criar Cadastro</h1>
         
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">

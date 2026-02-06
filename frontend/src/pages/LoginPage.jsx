@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
+import ThemeToggle from '../components/ThemeToggle.jsx';
 
 export default function LoginPage() {
   const { register, handleSubmit } = useForm();
@@ -39,6 +40,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-16">
+        <div className="flex items-center justify-end">
+          <ThemeToggle />
+        </div>
         <div className="relative -mx-4 -mt-16 mb-2">
           <div className="relative h-28 w-full">
             <svg
@@ -47,7 +51,7 @@ export default function LoginPage() {
               className="absolute inset-0 h-full w-full"
               preserveAspectRatio="none"
             >
-              <rect width="375" height="180" fill="#0f172a" />
+              <rect width="375" height="180" fill="#0f172a" className="login-hero-bg" />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <img

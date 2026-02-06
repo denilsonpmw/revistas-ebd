@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext.jsx';
 import { apiRequest } from '../api/client.js';
+import ThemeToggle from './ThemeToggle.jsx';
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -52,7 +53,7 @@ export default function AppLayout() {
           <Link to="/app" className="text-lg font-semibold">
             Revistas EBD
           </Link>
-          <nav className="flex gap-4 text-sm">
+          <nav className="hidden lg:flex gap-4 text-sm">
             <NavLink
               to="/app"
               end
@@ -127,6 +128,7 @@ export default function AppLayout() {
             <div className="text-xs text-slate-400">
               {user?.name} ({roleLabels[user?.role] || user?.role})
             </div>
+            <ThemeToggle />
             <button
               onClick={() => setShowChangePassword(true)}
               className="rounded bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs text-white"
@@ -146,9 +148,84 @@ export default function AppLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-24 md:pb-6">
         <Outlet />
       </main>
+
+      {/* Menu inferior (mobile) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur lg:hidden">
+        <div className="flex items-center gap-2 overflow-x-auto px-3 py-2 text-xs text-slate-300">
+          <NavLink
+            to="/app"
+            end
+            className={({ isActive }) =>
+              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+            }
+          >
+            Painel
+          </NavLink>
+          <NavLink
+            to="/app/pedidos"
+            className={({ isActive }) =>
+              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+            }
+          >
+            Pedidos
+          </NavLink>
+          <NavLink
+            to="/app/revistas"
+            className={({ isActive }) =>
+              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+            }
+          >
+            Catálogo
+          </NavLink>
+          <NavLink
+            to="/app/relatorios"
+            className={({ isActive }) =>
+              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+            }
+          >
+            Relatórios
+          </NavLink>
+          {user?.role === 'ADMIN' && (
+            <>
+              <NavLink
+                to="/app/revistas-admin"
+                className={({ isActive }) =>
+                  `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+                }
+              >
+                Revistas
+              </NavLink>
+              <NavLink
+                to="/app/revistas-variacoes"
+                className={({ isActive }) =>
+                  `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+                }
+              >
+                Variações
+              </NavLink>
+              <NavLink
+                to="/app/periodos"
+                className={({ isActive }) =>
+                  `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+                }
+              >
+                Períodos
+              </NavLink>
+              <NavLink
+                to="/app/usuarios"
+                className={({ isActive }) =>
+                  `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+                }
+              >
+                Usuários
+              </NavLink>
+            </>
+          )}
+        </div>
+      </nav>
 
       {/* Modal de Alterar Senha */}
       {showChangePassword && (
