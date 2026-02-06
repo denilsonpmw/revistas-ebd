@@ -156,7 +156,7 @@ export const Modal = ({
           shadow-2xl overflow-hidden
         `}>
           {/* Header */}
-          <div className="bg-slate-800 px-6 py-4 flex items-start gap-4">
+          <div className="bg-slate-900 px-6 py-4 flex items-start gap-4">
             <div className={`flex-shrink-0 ${colors.icon} mt-0.5`}>
               {getIcon()}
             </div>
@@ -175,7 +175,7 @@ export const Modal = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-slate-800 px-6 py-4 flex gap-3 justify-end border-t border-slate-700">
+          <div className="bg-slate-900 px-6 py-4 flex gap-3 justify-end">
             <button
               onClick={onCancel}
               className="
@@ -302,7 +302,7 @@ export const Alert = ({
           shadow-2xl overflow-hidden
         `}>
           {/* Header */}
-          <div className="bg-slate-800 px-6 py-4 flex items-start gap-4">
+          <div className="bg-slate-900 px-6 py-4 flex items-start gap-4">
             <div className={`flex-shrink-0 ${colors.icon} mt-0.5`}>
               {getIcon()}
             </div>
@@ -321,7 +321,7 @@ export const Alert = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-slate-800 px-6 py-4 flex justify-end border-t border-slate-700">
+          <div className="bg-slate-900 px-6 py-4 flex justify-end">
             <button
               onClick={onClose}
               className={`
