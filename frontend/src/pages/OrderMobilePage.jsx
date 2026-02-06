@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +20,7 @@ export default function OrderMobilePage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
   
   // Estados
   const [cart, setCart] = useState([]);
@@ -32,6 +34,7 @@ export default function OrderMobilePage() {
   const [selectedCartItem, setSelectedCartItem] = useState(null);
   const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDangerous: false });
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   // Query: Buscar revistas ativas
   const { data: magazines = [], isLoading: loadingMagazines } = useQuery({
@@ -203,6 +206,50 @@ export default function OrderMobilePage() {
         navigate('/', { replace: true });
       }
     });
+  };
+
+  const onSubmitChangePassword = async (data) => {
+    if (data.newPassword !== data.confirmPassword) {
+      setAlertState({
+        isOpen: true,
+        title: 'Aviso',
+        message: 'As senhas não coincidem',
+        type: 'warning'
+      });
+      return;
+    }
+
+    try {
+      await apiRequest('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword
+        })
+      });
+      setAlertState({
+        isOpen: true,
+        title: 'Sucesso',
+        message: 'Senha alterada com sucesso!',
+        type: 'success'
+      });
+      setShowChangePassword(false);
+      reset();
+    } catch (err) {
+      const message = err.message || '';
+      const friendlyMessage = message.includes('incorreta')
+        ? 'Senha atual incorreta'
+        : message.includes('Token')
+          ? 'Sessão expirada. Faça login novamente'
+          : message || 'Erro ao alterar senha';
+
+      setAlertState({
+        isOpen: true,
+        title: 'Erro',
+        message: friendlyMessage,
+        type: 'error'
+      });
+    }
   };
 
   const handleAddMagazine = (magazine) => {
@@ -491,6 +538,21 @@ export default function OrderMobilePage() {
                   #{lastOrderData.number ? String(lastOrderData.number).padStart(4, '0') : lastOrderData.id?.slice(0, 8)}
                 </p>
               </div>
+              <button
+                onClick={() => setShowChangePassword(true)}
+                className="
+                  bg-blue-600 hover:bg-blue-500
+                  text-white hover:text-slate-50
+                  px-3 py-2 rounded-lg
+                  transition-all duration-200
+                  text-xs font-semibold
+                  min-h-[44px] min-w-[44px]
+                  flex items-center justify-center
+                "
+                title="Alterar Senha"
+              >
+                🔐
+              </button>
             </div>
           </div>
         </header>
@@ -576,6 +638,85 @@ export default function OrderMobilePage() {
           onCancel={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
         />
 
+        {/* Modal de Alterar Senha */}
+        {showChangePassword && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full">
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-slate-100 mb-6">Alterar Senha</h2>
+
+                <form onSubmit={handleSubmit(onSubmitChangePassword)} className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Senha Atual</label>
+                    <input
+                      type="password"
+                      {...register('currentPassword', {
+                        required: 'Senha atual é obrigatória',
+                        minLength: { value: 4, message: 'Mínimo 4 caracteres' }
+                      })}
+                      placeholder="Digite sua senha atual"
+                      className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                    />
+                    {errors.currentPassword && (
+                      <p className="mt-1 text-sm text-red-400">{errors.currentPassword.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Nova Senha</label>
+                    <input
+                      type="password"
+                      {...register('newPassword', {
+                        required: 'Nova senha é obrigatória',
+                        minLength: { value: 4, message: 'Mínimo 4 caracteres' }
+                      })}
+                      placeholder="Digite sua nova senha"
+                      className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                    />
+                    {errors.newPassword && (
+                      <p className="mt-1 text-sm text-red-400">{errors.newPassword.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Confirmar Nova Senha</label>
+                    <input
+                      type="password"
+                      {...register('confirmPassword', {
+                        required: 'Confirme a nova senha'
+                      })}
+                      placeholder="Confirme sua nova senha"
+                      className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                    />
+                    {errors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-400">{errors.confirmPassword.message}</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowChangePassword(false);
+                        reset();
+                      }}
+                      className="flex-1 px-4 py-2 bg-slate-800 text-slate-100 rounded-lg hover:bg-slate-700 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
+                    >
+                      Alterar Senha
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Loading overlay */}
         {updateOrderMutation.isPending && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
@@ -631,6 +772,22 @@ export default function OrderMobilePage() {
                   </span>
                 </button>
               )}
+
+              <button
+                onClick={() => setShowChangePassword(true)}
+                className="
+                  bg-blue-600 hover:bg-blue-500
+                  text-white hover:text-slate-50
+                  px-3 py-2 rounded-lg
+                  transition-all duration-200
+                  text-xs font-semibold
+                  min-h-[44px] min-w-[44px]
+                  flex items-center justify-center
+                "
+                title="Alterar Senha"
+              >
+                🔐
+              </button>
 
               {/* Botão Logout */}
               <button
@@ -728,6 +885,85 @@ export default function OrderMobilePage() {
         magazine={selectedMagazine}
         onAddToCart={handleAddToCart}
       />
+
+      {/* Modal de Alterar Senha */}
+      {showChangePassword && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-slate-100 mb-6">Alterar Senha</h2>
+
+              <form onSubmit={handleSubmit(onSubmitChangePassword)} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Senha Atual</label>
+                  <input
+                    type="password"
+                    {...register('currentPassword', {
+                      required: 'Senha atual é obrigatória',
+                      minLength: { value: 4, message: 'Mínimo 4 caracteres' }
+                    })}
+                    placeholder="Digite sua senha atual"
+                    className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                  />
+                  {errors.currentPassword && (
+                    <p className="mt-1 text-sm text-red-400">{errors.currentPassword.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Nova Senha</label>
+                  <input
+                    type="password"
+                    {...register('newPassword', {
+                      required: 'Nova senha é obrigatória',
+                      minLength: { value: 4, message: 'Mínimo 4 caracteres' }
+                    })}
+                    placeholder="Digite sua nova senha"
+                    className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                  />
+                  {errors.newPassword && (
+                    <p className="mt-1 text-sm text-red-400">{errors.newPassword.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Confirmar Nova Senha</label>
+                  <input
+                    type="password"
+                    {...register('confirmPassword', {
+                      required: 'Confirme a nova senha'
+                    })}
+                    placeholder="Confirme sua nova senha"
+                    className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-800 text-slate-100"
+                  />
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-400">{errors.confirmPassword.message}</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowChangePassword(false);
+                      reset();
+                    }}
+                    className="flex-1 px-4 py-2 bg-slate-800 text-slate-100 rounded-lg hover:bg-slate-700 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
+                  >
+                    Alterar Senha
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Pedidos Recentes */}
       {isOrdersModalOpen && (
