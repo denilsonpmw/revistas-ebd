@@ -5,7 +5,7 @@ import { formatCurrency } from '../utils/currency';
  * Carrinho flutuante fixo no bottom da tela
  * Mostra total de itens e valor total do pedido
  */
-export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, isEditing = false, onEditItem = null, onCancelEdit = null }) => {
+export const FloatingCart = ({ items = [], onFinalize, onPendingOrder = null, hasPendingOrder = false, isEditing = false, onEditItem = null, onCancelEdit = null }) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
 
@@ -49,10 +49,10 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, 
           {/* Botões de ação */}
           <div className="flex items-center gap-2">
             <button
-              onClick={onFinalize}
-              disabled={hasPendingOrder}
+              onClick={hasPendingOrder && !isEditing && onPendingOrder ? onPendingOrder : onFinalize}
               className="
                 bg-emerald-600 hover:bg-emerald-500 
+                data-[pending=true]:bg-yellow-600 data-[pending=true]:hover:bg-yellow-500
                 disabled:bg-slate-700 disabled:cursor-not-allowed
                 text-white font-bold 
                 px-6 py-3 rounded-lg
@@ -60,6 +60,7 @@ export const FloatingCart = ({ items = [], onFinalize, hasPendingOrder = false, 
                 active:scale-95 shadow-lg
                 min-h-[44px]
               "
+              data-pending={hasPendingOrder && !isEditing ? 'true' : 'false'}
             >
               {isEditing ? 'Atualizar Pedido' : hasPendingOrder ? 'Pedido Pendente' : 'Finalizar Pedido'}
             </button>
