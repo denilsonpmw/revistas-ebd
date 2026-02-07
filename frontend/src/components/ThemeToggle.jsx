@@ -41,7 +41,7 @@ export default function ThemeToggle({ className = '' }) {
     <button
       type="button"
       onClick={() => setTheme(getNextTheme(theme))}
-      className={`rounded border border-slate-700 bg-slate-900/50 text-slate-200 px-2 py-1 text-xs min-h-[44px] min-w-[44px] flex items-center justify-center ${className}`}
+      className={`rounded-lg border border-slate-700 bg-slate-900/50 text-slate-200 px-2 py-1 text-xs min-h-[44px] min-w-[44px] flex items-center justify-center ${className}`}
       aria-label={`Tema: ${labels[theme]}`}
       title={`Tema: ${labels[theme]}`}
     >

@@ -81,7 +81,9 @@ export default function OrderMobilePage() {
     return { group: 0, value: -1 };
   };
 
-  const sortedMagazines = [...magazines].sort((a, b) => {
+  const magazineList = Array.isArray(magazines) ? magazines : magazines?.magazines || [];
+
+  const sortedMagazines = [...magazineList].sort((a, b) => {
     const aKey = getAgeRangeSortKey(a.ageRange);
     const bKey = getAgeRangeSortKey(b.ageRange);
 
@@ -891,13 +893,13 @@ export default function OrderMobilePage() {
 
       {/* Ações no rodapé */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
-        <div className="max-w-md mx-auto flex items-center gap-2 px-4 py-2">
+        <div className="max-w-md mx-auto flex items-center justify-center gap-2 px-4 py-2">
           <button
             onClick={() => setIsOrdersModalOpen(true)}
             disabled={userOrders.length === 0}
             className="
-              relative bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
-              text-slate-100 hover:text-slate-50
+              relative bg-yellow-600 hover:bg-yellow-500
+              text-slate-900 hover:text-slate-900
               px-3 py-2 rounded-lg
               transition-all duration-200
               text-xs font-semibold
@@ -911,7 +913,7 @@ export default function OrderMobilePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             {userOrders.length > 0 && (
-              <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+              <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
                 {userOrders.length}
               </span>
             )}
@@ -920,8 +922,8 @@ export default function OrderMobilePage() {
           <button
             onClick={() => setShowChangePassword(true)}
             className="
-              bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
-              text-slate-100 hover:text-slate-50
+              bg-emerald-600 hover:bg-emerald-500
+              text-white hover:text-white
               px-3 py-2 rounded-lg
               transition-all duration-200
               text-xs font-semibold
@@ -940,8 +942,8 @@ export default function OrderMobilePage() {
           <button
             onClick={handleLogout}
             className="
-              bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
-              text-slate-100 hover:text-slate-50
+              bg-red-600 hover:bg-red-500
+              text-white hover:text-slate-50
               px-3 py-2 rounded-lg
               transition-all duration-200
               text-xs font-semibold

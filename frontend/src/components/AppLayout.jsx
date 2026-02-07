@@ -154,12 +154,12 @@ export default function AppLayout() {
             <div className="hidden xl:block text-xs text-slate-400 whitespace-nowrap">
               {user?.name} ({roleLabels[user?.role] || user?.role})
             </div>
-            <ThemeToggle />
+            <ThemeToggle className="header-action-btn" />
             <button
               onClick={() => setShowChangePassword(true)}
               className="
-                bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
-                text-slate-100 hover:text-slate-50
+                bg-emerald-600 hover:bg-emerald-500
+                text-white hover:text-white
                 px-3 py-2 rounded-lg
                 transition-all duration-200
                 text-xs font-semibold
@@ -177,8 +177,8 @@ export default function AppLayout() {
             <button
               onClick={logout}
               className="
-                bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
-                text-slate-100 hover:text-slate-50
+                bg-red-600 hover:bg-red-500
+                text-white hover:text-slate-50
                 px-3 py-2 rounded-lg
                 transition-all duration-200
                 text-xs font-semibold
