@@ -49,11 +49,11 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="border-b border-slate-800">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4">
           <Link to="/app" className="text-lg font-semibold">
             Revistas EBD
           </Link>
-          <nav className="hidden lg:flex gap-4 text-sm">
+          <nav className="hidden lg:flex flex-1 flex-wrap items-center justify-center gap-4 text-sm">
             <NavLink
               to="/app"
               end
@@ -63,6 +63,7 @@ export default function AppLayout() {
             >
               Painel
             </NavLink>
+
             <NavLink
               to="/app/pedidos"
               className={({ isActive }) =>
@@ -71,77 +72,122 @@ export default function AppLayout() {
             >
               Pedidos
             </NavLink>
-            <NavLink
-              to="/app/revistas"
-              className={({ isActive }) =>
-                isActive ? 'text-emerald-400' : 'text-slate-300'
-              }
-            >
-              Catálogo
-            </NavLink>
-            <NavLink
-              to="/app/relatorios"
-              className={({ isActive }) =>
-                isActive ? 'text-emerald-400' : 'text-slate-300'
-              }
-            >
-              Relatórios
-            </NavLink>
+
             {user?.role === 'ADMIN' && (
-              <>
+              <div className="relative group">
+                <button
+                  type="button"
+                  className="text-slate-300 hover:text-slate-100 transition-colors"
+                  aria-haspopup="true"
+                >
+                  Cadastros
+                </button>
+                <div className="absolute left-0 top-full mt-0 hidden min-w-[220px] rounded-lg border border-slate-800 bg-slate-900 shadow-xl group-hover:block hover:block">
+                  <NavLink
+                    to="/app/revistas-admin"
+                    className={({ isActive }) =>
+                      `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
+                    }
+                  >
+                    Gerenciar revistas
+                  </NavLink>
+                  <NavLink
+                    to="/app/revistas-variacoes"
+                    className={({ isActive }) =>
+                      `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
+                    }
+                  >
+                    Variações de revistas
+                  </NavLink>
+                  <NavLink
+                    to="/app/periodos"
+                    className={({ isActive }) =>
+                      `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
+                    }
+                  >
+                    Períodos
+                  </NavLink>
+                </div>
+              </div>
+            )}
+
+            <div className="relative group">
+              <button
+                type="button"
+                className="text-slate-300 hover:text-slate-100 transition-colors"
+                aria-haspopup="true"
+              >
+                Relatórios
+              </button>
+              <div className="absolute left-0 top-full mt-0 hidden min-w-[200px] rounded-lg border border-slate-800 bg-slate-900 shadow-xl group-hover:block hover:block">
                 <NavLink
-                  to="/app/revistas-admin"
+                  to="/app/revistas"
                   className={({ isActive }) =>
-                    isActive ? 'text-emerald-400' : 'text-slate-300'
+                    `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
                   }
                 >
-                  Gerenciar Revistas
+                  Catálogo
                 </NavLink>
                 <NavLink
-                  to="/app/revistas-variacoes"
+                  to="/app/relatorios"
                   className={({ isActive }) =>
-                    isActive ? 'text-emerald-400' : 'text-slate-300'
+                    `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
                   }
                 >
-                  Variações de Revistas
+                  Relatórios
                 </NavLink>
-                <NavLink
-                  to="/app/periodos"
-                  className={({ isActive }) =>
-                    isActive ? 'text-emerald-400' : 'text-slate-300'
-                  }
-                >
-                  Períodos
-                </NavLink>
-                <NavLink
-                  to="/app/usuarios"
-                  className={({ isActive }) =>
-                    isActive ? 'text-emerald-400' : 'text-slate-300'
-                  }
-                >
-                  Usuários
-                </NavLink>
-              </>
+              </div>
+            </div>
+
+            {user?.role === 'ADMIN' && (
+              <NavLink
+                to="/app/usuarios"
+                className={({ isActive }) =>
+                  isActive ? 'text-emerald-400' : 'text-slate-300'
+                }
+              >
+                Usuários
+              </NavLink>
             )}
           </nav>
-          <div className="flex items-center gap-3">
-            <div className="text-xs text-slate-400">
+          <div className="ml-auto flex items-center gap-3">
+            <div className="hidden xl:block text-xs text-slate-400 whitespace-nowrap">
               {user?.name} ({roleLabels[user?.role] || user?.role})
             </div>
             <ThemeToggle />
             <button
               onClick={() => setShowChangePassword(true)}
-              className="rounded bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs text-white"
+              className="
+                bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700
+                text-slate-100 hover:text-slate-50
+                px-3 py-2 rounded-lg
+                transition-all duration-200
+                text-xs font-semibold
+                min-h-[44px] min-w-[44px]
+                flex items-center justify-center
+              "
               title="Alterar Senha"
             >
-              🔐
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+                <circle cx="12" cy="14" r="1" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2" />
+              </svg>
             </button>
             <button
               onClick={logout}
-              className="rounded bg-red-600 hover:bg-red-500 px-3 py-1 text-xs text-white"
+              className="
+                bg-slate-900/50 hover:bg-slate-900/70 border border-red-500
+                text-slate-100 hover:text-slate-50
+                px-3 py-2 rounded-lg
+                transition-all duration-200
+                text-xs font-semibold
+                min-h-[44px] min-w-[44px]
+                flex items-center justify-center
+              "
               title="Sair"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
               </svg>
             </button>
