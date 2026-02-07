@@ -12,19 +12,17 @@ const queryClient = new QueryClient();
 
 const initTheme = () => {
   if (typeof window === 'undefined') return;
-  const allowedThemes = ['system', 'light', 'dark'];
-  let stored = 'system';
+  const allowedThemes = ['light', 'dark'];
+  let stored = 'light';
   try {
     const value = localStorage.getItem('theme');
-    stored = allowedThemes.includes(value) ? value : 'system';
+    stored = allowedThemes.includes(value) ? value : 'light';
   } catch (err) {
-    stored = 'system';
+    stored = 'light';
   }
 
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const resolved = stored === 'system' ? (prefersDark ? 'dark' : 'light') : stored;
-  document.documentElement.setAttribute('data-theme', resolved);
-  document.documentElement.style.colorScheme = resolved;
+  document.documentElement.setAttribute('data-theme', stored);
+  document.documentElement.style.colorScheme = stored;
 };
 
 const isMobileDevice = () => {

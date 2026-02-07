@@ -2,32 +2,27 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 
 const ThemeContext = createContext(null);
 
-const allowedThemes = ['system', 'light', 'dark'];
+const allowedThemes = ['light', 'dark'];
 
 const getStoredTheme = () => {
-  if (typeof window === 'undefined') return 'system';
+  if (typeof window === 'undefined') return 'light';
   try {
     const stored = localStorage.getItem('theme');
-    return allowedThemes.includes(stored) ? stored : 'system';
+    return allowedThemes.includes(stored) ? stored : 'light';
   } catch (err) {
-    return 'system';
+    return 'light';
   }
 };
 
-const getSystemTheme = () => {
-  if (typeof window === 'undefined') return 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-};
+const getSystemTheme = () => 'light';
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(getStoredTheme);
-  const [resolvedTheme, setResolvedTheme] = useState(() => (theme === 'system' ? getSystemTheme() : theme));
+  const [resolvedTheme, setResolvedTheme] = useState(() => theme);
 
   useEffect(() => {
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-
     const applyTheme = () => {
-      const nextResolved = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
+      const nextResolved = theme;
       setResolvedTheme(nextResolved);
       document.documentElement.setAttribute('data-theme', nextResolved);
       document.documentElement.style.colorScheme = nextResolved;
@@ -35,29 +30,11 @@ export function ThemeProvider({ children }) {
 
     applyTheme();
 
-    const handleChange = () => {
-      if (theme === 'system') {
-        applyTheme();
-      }
-    };
-
-    if (media.addEventListener) {
-      media.addEventListener('change', handleChange);
-    } else {
-      media.addListener(handleChange);
-    }
-
-    return () => {
-      if (media.removeEventListener) {
-        media.removeEventListener('change', handleChange);
-      } else {
-        media.removeListener(handleChange);
-      }
-    };
+    return () => {};
   }, [theme]);
 
   const setTheme = (value) => {
-    const next = allowedThemes.includes(value) ? value : 'system';
+    const next = allowedThemes.includes(value) ? value : 'light';
     setThemeState(next);
     try {
       localStorage.setItem('theme', next);
