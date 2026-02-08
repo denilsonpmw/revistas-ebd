@@ -43,24 +43,12 @@ export default function LoginPage() {
         <div className="flex items-center justify-end">
           <ThemeToggle />
         </div>
-        <div className="relative -mx-4 -mt-16 mb-2">
-          <div className="relative h-28 w-full">
-            <svg
-              viewBox="0 0 375 180"
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute inset-0 h-full w-full"
-              preserveAspectRatio="none"
-            >
-              <rect width="375" height="180" fill="#0f172a" className="login-hero-bg" />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <img
-                src="/logo-ebd-campo.svg"
-                alt="Revistas EBD"
-                className="h-20 w-20"
-              />
-            </div>
-          </div>
+        <div className="flex items-center justify-center">
+          <img
+            src="/logo-ebd-campo.svg"
+            alt="Revistas EBD"
+            className="h-20 w-20"
+          />
         </div>
         <h1 className="text-2xl font-semibold">Acesso Revistas EBD</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
