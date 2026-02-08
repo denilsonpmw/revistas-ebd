@@ -55,7 +55,7 @@ export default function LoginPage() {
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <img
-                src="/logo-original.svg"
+                src="/logo-ebd-campo.svg"
                 alt="Revistas EBD"
                 className="h-20 w-20"
               />
