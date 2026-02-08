@@ -70,9 +70,12 @@ export default function DashboardPage() {
   const currentPeriod = periods.find(p => {
     if (!p.active) return false;
     const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const start = new Date(p.startDate);
     const end = new Date(p.endDate);
-    return now >= start && now <= end;
+    const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    return startOfToday >= startDay && startOfToday <= endDay;
   });
 
   // Período anterior (mais recente anterior ao atual)
@@ -98,7 +101,19 @@ export default function DashboardPage() {
     : (totalValue > 0 ? 100 : 0);
 
   // Calcular dias restantes do período
-  const daysUntilPeriodEnd = currentPeriod ? Math.ceil((new Date(currentPeriod.endDate) - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+  const daysUntilPeriodEnd = currentPeriod
+    ? Math.max(
+        0,
+        Math.round(
+          (new Date(
+            new Date(currentPeriod.endDate).getFullYear(),
+            new Date(currentPeriod.endDate).getMonth(),
+            new Date(currentPeriod.endDate).getDate()
+          ) - new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) /
+            (1000 * 60 * 60 * 24)
+        )
+      )
+    : 0;
 
   // Dados para gráfico - Trimestres do ano
   const getTrimesters = () => {

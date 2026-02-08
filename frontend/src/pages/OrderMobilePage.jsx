@@ -110,18 +110,31 @@ export default function OrderMobilePage() {
       const data = await apiRequest('/periods');
       const periods = data.periods || [];
       const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
       // Período ativo atual (dentro do intervalo de datas)
       const activePeriod = periods.find(p => {
         if (!p.active) return false;
         const start = new Date(p.startDate);
         const end = new Date(p.endDate);
-        return now >= start && now <= end;
+        const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+        return startOfToday >= startDay && startOfToday <= endDay;
       });
       
       // Calcular dias restantes
-      const daysRemaining = activePeriod 
-        ? Math.ceil((new Date(activePeriod.endDate) - now) / (1000 * 60 * 60 * 24))
+      const daysRemaining = activePeriod
+        ? Math.max(
+            0,
+            Math.round(
+              (new Date(
+                new Date(activePeriod.endDate).getFullYear(),
+                new Date(activePeriod.endDate).getMonth(),
+                new Date(activePeriod.endDate).getDate()
+              ) - startOfToday) /
+                (1000 * 60 * 60 * 24)
+            )
+          )
         : 0;
       
       return { activePeriod, daysRemaining };
