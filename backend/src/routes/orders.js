@@ -279,6 +279,7 @@ router.patch('/:id', requireRole(['USER', 'MANAGER', 'ADMIN']), async (req, res)
     const itemTotal = Number((item.quantity * Number(unitPrice)).toFixed(2));
     processedItems.push({
       magazineId: item.magazineId,
+      combinationId: combination.id,
       quantity: item.quantity,
       unitPrice,
       totalValue: new Prisma.Decimal(itemTotal),

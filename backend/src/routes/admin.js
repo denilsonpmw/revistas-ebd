@@ -166,22 +166,54 @@ router.get('/report', async (req, res) => {
     }
   });
 
+  const fallbackCombinationIds = Array.from(
+    new Set(
+      orders.flatMap(order =>
+        order.items
+          .filter(item => !item.combinationId && item.variantData?.combinationId)
+          .map(item => item.variantData.combinationId)
+      )
+    )
+  );
+
+  const fallbackCombinations = fallbackCombinationIds.length
+    ? await prisma.magazineVariantCombination.findMany({
+        where: { id: { in: fallbackCombinationIds } }
+      })
+    : [];
+
+  const combinationById = new Map(
+    fallbackCombinations.map(combination => [combination.id, combination])
+  );
+
   // Agrupa por congregação, revista E variação
   const groupedMap = new Map();
   
   for (const order of orders) {
     for (const item of order.items) {
       // Chave única por congregação + revista + variação
+      const fallbackCombination = item.variantData?.combinationId
+        ? combinationById.get(item.variantData.combinationId)
+        : null;
       const variantKey = item.combinationId
         || item.variantCombination?.id
+        || fallbackCombination?.id
         || item.variantCombination?.code
         || item.variantData?.combinationId
         || item.variantData?.combinationCode
         || 'no-variant';
       const key = `${order.congregationId}-${item.magazineId}-${variantKey}`;
 
-      const variantCode = item.variantCombination?.code || item.variantData?.code || item.variantData?.combinationCode || '-';
-      const variantName = item.variantCombination?.name || item.variantData?.name || item.variantData?.combinationName || 'Sem variação';
+      const variantCode = item.variantCombination?.code
+        || fallbackCombination?.code
+        || item.variantData?.code
+        || item.variantData?.combinationCode
+        || '-';
+      const variantName = item.variantCombination?.name
+        || fallbackCombination?.name
+        || item.variantData?.name
+        || item.variantData?.combinationName
+        || 'Sem variação';
       
       if (!groupedMap.has(key)) {
         groupedMap.set(key, {
