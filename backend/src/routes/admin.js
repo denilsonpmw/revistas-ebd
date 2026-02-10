@@ -172,10 +172,14 @@ router.get('/report', async (req, res) => {
   for (const order of orders) {
     for (const item of order.items) {
       // Chave única por congregação + revista + variação
-      const key = `${order.congregationId}-${item.magazineId}-${item.combinationId || 'no-variant'}`;
-      
-      // Se não temos combinationId mas temos variantData com combinationId, usar aquele
-      const effectiveCombinationId = item.combinationId || item.variantData?.combinationId;
+      const variantKey = item.combinationId
+        || item.variantCombination?.id
+        || item.variantCombination?.code
+        || item.variantData?.combinationId
+        || item.variantData?.combinationCode
+        || 'no-variant';
+      const key = `${order.congregationId}-${item.magazineId}-${variantKey}`;
+
       const variantCode = item.variantCombination?.code || item.variantData?.code || item.variantData?.combinationCode || '-';
       const variantName = item.variantCombination?.name || item.variantData?.name || item.variantData?.combinationName || 'Sem variação';
       
