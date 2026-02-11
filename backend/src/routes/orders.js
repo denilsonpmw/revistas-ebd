@@ -130,18 +130,50 @@ router.get('/', async (req, res) => {
     }
   });
 
+  const fallbackCombinationIds = Array.from(
+    new Set(
+      orders.flatMap(order =>
+        order.items
+          .filter(item => !item.combinationId && item.variantData?.combinationId)
+          .map(item => item.variantData.combinationId)
+      )
+    )
+  );
+
+  const fallbackCombinations = fallbackCombinationIds.length
+    ? await prisma.magazineVariantCombination.findMany({
+        where: { id: { in: fallbackCombinationIds } }
+      })
+    : [];
+
+  const combinationById = new Map(
+    fallbackCombinations.map(combination => [combination.id, combination])
+  );
+
   // Serializar Decimal para número
   const serializedOrders = orders.map(order => ({
     ...order,
-    items: order.items.map(item => ({
-      ...item,
-      unitPrice: Number(item.unitPrice),
-      totalValue: Number(item.totalValue),
-      magazine: {
-        ...item.magazine,
-        unitPrice: Number(item.magazine.unitPrice)
-      }
-    }))
+    items: order.items.map(item => {
+      const fallbackCombination = item.variantData?.combinationId
+        ? combinationById.get(item.variantData.combinationId)
+        : null;
+      return {
+        ...item,
+        variantData: fallbackCombination
+          ? {
+              ...(item.variantData || {}),
+              combinationCode: item.variantData?.combinationCode || fallbackCombination.code,
+              combinationName: item.variantData?.combinationName || fallbackCombination.name
+            }
+          : item.variantData,
+        unitPrice: Number(item.unitPrice),
+        totalValue: Number(item.totalValue),
+        magazine: {
+          ...item.magazine,
+          unitPrice: Number(item.magazine.unitPrice)
+        }
+      };
+    })
   }));
 
   return res.json({ orders: serializedOrders });
@@ -177,17 +209,47 @@ router.get('/:id', async (req, res) => {
   }
 
   // Serializar Decimal para número
+  const detailFallbackIds = Array.from(
+    new Set(
+      order.items
+        .filter(item => !item.combinationId && item.variantData?.combinationId)
+        .map(item => item.variantData.combinationId)
+    )
+  );
+
+  const detailFallbackCombinations = detailFallbackIds.length
+    ? await prisma.magazineVariantCombination.findMany({
+        where: { id: { in: detailFallbackIds } }
+      })
+    : [];
+
+  const detailCombinationById = new Map(
+    detailFallbackCombinations.map(combination => [combination.id, combination])
+  );
+
   const serializedOrder = {
     ...order,
-    items: order.items.map(item => ({
-      ...item,
-      unitPrice: Number(item.unitPrice),
-      totalValue: Number(item.totalValue),
-      magazine: {
-        ...item.magazine,
-        unitPrice: Number(item.magazine.unitPrice)
-      }
-    }))
+    items: order.items.map(item => {
+      const fallbackCombination = item.variantData?.combinationId
+        ? detailCombinationById.get(item.variantData.combinationId)
+        : null;
+      return {
+        ...item,
+        variantData: fallbackCombination
+          ? {
+              ...(item.variantData || {}),
+              combinationCode: item.variantData?.combinationCode || fallbackCombination.code,
+              combinationName: item.variantData?.combinationName || fallbackCombination.name
+            }
+          : item.variantData,
+        unitPrice: Number(item.unitPrice),
+        totalValue: Number(item.totalValue),
+        magazine: {
+          ...item.magazine,
+          unitPrice: Number(item.magazine.unitPrice)
+        }
+      };
+    })
   };
 
   return res.json({ order: serializedOrder });
