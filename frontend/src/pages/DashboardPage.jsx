@@ -405,6 +405,9 @@ export default function DashboardPage() {
                 <XAxis
                   dataKey="name"
                   stroke="#94a3b8"
+                  interval={0}
+                  height={40}
+                  tick={{ fontSize: 12 }}
                   tickFormatter={(value) => (value && value.length > 12 ? `${value.slice(0, 12)}…` : value)}
                 />
                 <Tooltip
