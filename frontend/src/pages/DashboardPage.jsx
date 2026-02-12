@@ -372,7 +372,7 @@ export default function DashboardPage() {
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Pedidos por Trimestre ({currentYear})</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={trimesterOrders}>
+            <BarChart data={trimesterOrders} margin={{ top: 24, right: 16, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" stroke="#94a3b8" />
               <Tooltip
                 content={(props) => (
@@ -386,7 +386,7 @@ export default function DashboardPage() {
                 )}
                 cursor={{ fill: 'rgba(59,130,246,0.08)' }}
               />
-              <Bar dataKey="valor" fill="#3b82f6" name="Valor Total" label={{ position: 'top', fill: '#94a3b8', formatter: (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }} background={false} />
+              <Bar dataKey="valor" fill="#3b82f6" name="Valor Total" label={{ position: 'top', offset: 8, fill: '#94a3b8', formatter: (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }} background={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -401,7 +401,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={ordersByClass}>
+              <BarChart data={ordersByClass} margin={{ top: 24, right: 16, left: 0, bottom: 0 }}>
                 <XAxis dataKey="name" stroke="#94a3b8" />
                 <Tooltip
                   content={(props) => (
@@ -415,7 +415,7 @@ export default function DashboardPage() {
                   )}
                   cursor={{ fill: 'rgba(16,185,129,0.08)' }}
                 />
-                <Bar dataKey="quantidade" fill="#10b981" name="Quantidade" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
+                <Bar dataKey="quantidade" fill="#10b981" name="Quantidade" label={{ position: 'top', offset: 8, fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
               </BarChart>
             </ResponsiveContainer>
           )}

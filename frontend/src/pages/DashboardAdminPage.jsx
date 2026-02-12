@@ -187,13 +187,13 @@ export default function DashboardAdminPage() {
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Pedidos de revistas por Área</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={areaStats}>
+            <BarChart data={areaStats} margin={{ top: 24, right: 16, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" stroke="#94a3b8" />
               <Tooltip
                 content={(props) => <CustomTooltip {...props} quantityKey="revistas" valueKey="valor" theme="dark" showTotal labelValueIsCurrency={false} />} 
                 cursor={{ fill: 'rgba(16,185,129,0.08)' }}
               />
-              <Bar dataKey="revistas" name="Revistas" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false}>
+              <Bar dataKey="revistas" name="Revistas" label={{ position: 'top', offset: 8, fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false}>
                 {areaStats.map((entry, index) => (
                   <Cell key={`cell-area-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
