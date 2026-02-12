@@ -402,7 +402,11 @@ export default function DashboardPage() {
           ) : (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={ordersByClass} margin={{ top: 24, right: 16, left: 0, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="#94a3b8" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  tickFormatter={(value) => (value && value.length > 12 ? `${value.slice(0, 12)}…` : value)}
+                />
                 <Tooltip
                   content={(props) => (
                     <CustomTooltip
