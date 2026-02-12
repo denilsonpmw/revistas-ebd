@@ -82,7 +82,7 @@ export default function DashboardAdminPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
+        <h2 className="text-2xl font-bold">Painel</h2>
         
         {/* Tabs de navegação */}
         <div className="flex gap-2">
