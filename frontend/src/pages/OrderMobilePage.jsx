@@ -98,8 +98,13 @@ export default function OrderMobilePage() {
     queryFn: async () => {
       const data = await apiRequest('/orders');
       const orders = data.orders || [];
-      // Retornar apenas os 5 mais recentes
-      return orders.slice(0, 5);
+      // Retornar apenas os 5 mais recentes (considerando edições)
+      const sorted = [...orders].sort((a, b) => {
+        const aDate = new Date(a.updatedAt || a.createdAt);
+        const bDate = new Date(b.updatedAt || b.createdAt);
+        return bDate - aDate;
+      });
+      return sorted.slice(0, 5);
     }
   });
 
