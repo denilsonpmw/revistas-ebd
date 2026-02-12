@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 import { apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext.jsx';
+import CustomTooltip from '../components/CustomTooltip';
 
 const statusPT = {
   PENDING: 'Pendente',
@@ -374,10 +375,16 @@ export default function DashboardPage() {
             <BarChart data={trimesterOrders}>
               <XAxis dataKey="name" stroke="#94a3b8" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
-                labelStyle={{ color: '#f1f5f9' }}
-                itemStyle={{ color: '#3b82f6' }}
-                formatter={(value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                content={(props) => (
+                  <CustomTooltip
+                    {...props}
+                    quantityKey="valor"
+                    valueKey="valor"
+                    theme="dark"
+                    labelValueIsCurrency
+                  />
+                )}
+                cursor={{ fill: 'rgba(59,130,246,0.08)' }}
               />
               <Bar dataKey="valor" fill="#3b82f6" name="Valor Total" label={{ position: 'top', fill: '#94a3b8', formatter: (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }} background={false} />
             </BarChart>
@@ -397,9 +404,16 @@ export default function DashboardPage() {
               <BarChart data={ordersByClass}>
                 <XAxis dataKey="name" stroke="#94a3b8" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
-                  labelStyle={{ color: '#f1f5f9' }}
-                  itemStyle={{ color: '#10b981' }}
+                  content={(props) => (
+                    <CustomTooltip
+                      {...props}
+                      quantityKey="quantidade"
+                      valueKey="quantidade"
+                      theme="dark"
+                      labelValueIsCurrency={false}
+                    />
+                  )}
+                  cursor={{ fill: 'rgba(16,185,129,0.08)' }}
                 />
                 <Bar dataKey="quantidade" fill="#10b981" name="Quantidade" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
               </BarChart>

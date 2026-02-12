@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import CustomTooltip from '../components/CustomTooltip';
 import { apiRequest } from '../api/client';
 import { formatCurrency } from '../utils/currency';
 import CongregationManager from '../components/CongregationManager';
@@ -42,11 +43,27 @@ export default function DashboardAdminPage() {
   const totalValue = orders.reduce((sum, o) => sum + Number(o.totalValue || 0), 0);
   const totalQuantity = orders.reduce((sum, o) => sum + (o.quantity || 0), 0);
 
+  const sumOrderValue = (order) =>
+    (order.items || []).reduce((sum, item) => sum + Number(item.totalValue || (item.unitPrice || 0) * (item.quantity || 0)), 0);
+
+  const sumOrderItems = (order) =>
+    (order.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+  const getStatusValue = (status) =>
+    orders
+      .filter(o => o.status === status)
+      .reduce((sum, o) => sum + sumOrderValue(o), 0);
+
+  const getStatusItems = (status) =>
+    orders
+      .filter(o => o.status === status)
+      .reduce((sum, o) => sum + sumOrderItems(o), 0);
+
   const ordersByStatus = [
-    { name: 'Pendente', value: pendingOrders, color: '#f59e0b' },
-    { name: 'Pago', value: approvedOrders, color: '#3b82f6' },
-    { name: 'Entregue', value: deliveredOrders, color: '#10b981' },
-    { name: 'Cancelado', value: orders.filter(o => o.status === 'CANCELED').length, color: '#ef4444' }
+    { name: 'Pendente', value: pendingOrders, valorTotal: getStatusValue('PENDING'), quantidadeTotal: getStatusItems('PENDING'), color: '#f59e0b' },
+    { name: 'Pago', value: approvedOrders, valorTotal: getStatusValue('APPROVED'), quantidadeTotal: getStatusItems('APPROVED'), color: '#3b82f6' },
+    { name: 'Entregue', value: deliveredOrders, valorTotal: getStatusValue('DELIVERED'), quantidadeTotal: getStatusItems('DELIVERED'), color: '#10b981' },
+    { name: 'Cancelado', value: orders.filter(o => o.status === 'CANCELED').length, valorTotal: getStatusValue('CANCELED'), quantidadeTotal: getStatusItems('CANCELED'), color: '#ef4444' }
   ].filter(item => item.value > 0);
 
   const areaStats = areas.map(area => {
@@ -58,10 +75,12 @@ export default function DashboardAdminPage() {
       return sum + (o.items?.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0) || 0);
     }, 0);
     
+    const totalValor = areaOrders.reduce((sum, o) => sum + sumOrderValue(o), 0);
+
     return {
       name: area.name,
       revistas: totalRevistas,
-      valor: areaOrders.reduce((sum, o) => sum + Number(o.totalValue || 0), 0)
+      valor: totalValor
     };
   });
 
@@ -158,9 +177,8 @@ export default function DashboardAdminPage() {
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
-                labelStyle={{ color: '#f1f5f9' }}
-                itemStyle={{ color: '#6366f1' }}
+                content={(props) => <CustomTooltip {...props} quantityKey="quantidadeTotal" valueKey="valorTotal" theme="dark" showTotal labelValueIsCurrency={false} />} 
+                cursor={{ fill: 'rgba(59,130,246,0.08)' }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -172,11 +190,14 @@ export default function DashboardAdminPage() {
             <BarChart data={areaStats}>
               <XAxis dataKey="name" stroke="#94a3b8" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#f1f5f9' }}
-                labelStyle={{ color: '#f1f5f9' }}
-                itemStyle={{ color: '#6366f1' }}
+                content={(props) => <CustomTooltip {...props} quantityKey="revistas" valueKey="valor" theme="dark" showTotal labelValueIsCurrency={false} />} 
+                cursor={{ fill: 'rgba(16,185,129,0.08)' }}
               />
-              <Bar dataKey="revistas" fill="#6366f1" name="Revistas" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false} />
+              <Bar dataKey="revistas" name="Revistas" label={{ position: 'top', fill: '#94a3b8', fontWeight: 600, fontSize: 14 }} background={false}>
+                {areaStats.map((entry, index) => (
+                  <Cell key={`cell-area-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
