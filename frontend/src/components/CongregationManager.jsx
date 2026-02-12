@@ -7,6 +7,7 @@ export default function CongregationManager() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCongregation, setEditingCongregation] = useState(null);
+  const [areaFilter, setAreaFilter] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -29,6 +30,14 @@ export default function CongregationManager() {
 
   const congregations = congregationsData?.congregations || [];
   const areas = areasData?.areas || [];
+  const areaById = areas.reduce((acc, area) => {
+    acc[area.id] = area.name;
+    return acc;
+  }, {});
+
+  const filteredCongregations = areaFilter
+    ? congregations.filter((congregation) => congregation.areaId === areaFilter)
+    : congregations;
 
   const createMutation = useMutation({
     mutationFn: (data) => apiRequest('/admin/congregations', { method: 'POST', body: data }),
@@ -131,20 +140,100 @@ export default function CongregationManager() {
     }));
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '', 'height=700,width=900');
+    if (!printWindow) return;
+
+    const rows = filteredCongregations.map((congregation) => `
+      <tr>
+        <td>${congregation.name}</td>
+        <td>${congregation.code}</td>
+        <td>${congregation.area?.name || areaById[congregation.areaId] || '-'}</td>
+        <td>${congregation.city || '-'}</td>
+        <td>${congregation.contactName || '-'}</td>
+        <td>${congregation.isHeadquarters ? 'Sede' : 'Congregação'}</td>
+      </tr>
+    `).join('');
+
+    const areaTitle = areaFilter ? (areaById[areaFilter] || 'Área selecionada') : 'Todas as áreas';
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Congregações - ${areaTitle}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; }
+            h1 { font-size: 18px; margin: 0 0 8px; }
+            h2 { font-size: 14px; margin: 0 0 16px; color: #475569; font-weight: 400; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
+            th { background: #f1f5f9; }
+          </style>
+        </head>
+        <body>
+          <h1>Relatório de Congregações</h1>
+          <h2>${areaTitle}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Área</th>
+                <th>Cidade</th>
+                <th>Contato</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows || '<tr><td colspan="6">Nenhuma congregação encontrada.</td></tr>'}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   if (isLoading) {
     return <div className="p-6">Carregando congregações...</div>;
   }
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Gerenciar Congregações</h3>
-        <button
-          onClick={handleOpenCreate}
-          className="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold hover:bg-emerald-700"
-        >
-          + Nova Congregação
-        </button>
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Gerenciar Congregações</h3>
+          <p className="text-xs text-slate-400">{filteredCongregations.length} congregação(ões)</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={areaFilter}
+            onChange={(e) => setAreaFilter(e.target.value)}
+            className="rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white"
+          >
+            <option value="">Todas as áreas</option>
+            {areas.map((area) => (
+              <option key={area.id} value={area.id}>
+                {area.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handlePrint}
+            className="rounded border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold hover:bg-slate-700"
+          >
+            Imprimir
+          </button>
+          <button
+            onClick={handleOpenCreate}
+            className="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold hover:bg-emerald-700"
+          >
+            Adicionar
+          </button>
+        </div>
       </div>
 
       <div className="overflow-auto">
@@ -161,7 +250,7 @@ export default function CongregationManager() {
             </tr>
           </thead>
           <tbody>
-            {congregations.map((congregation) => (
+            {filteredCongregations.map((congregation) => (
               <tr key={congregation.id} className="border-t border-slate-800">
                 <td className="p-3">{congregation.name}</td>
                 <td className="p-3">
