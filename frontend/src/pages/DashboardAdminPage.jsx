@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReceiptIssuerModal from '../components/ReceiptIssuerModal';
+import ReceiptTemplate from '../components/ReceiptTemplate';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import CustomTooltip from '../components/CustomTooltip';
@@ -10,6 +12,10 @@ const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export default function DashboardAdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [showIssuerModal, setShowIssuerModal] = useState(false);
+
   const ordersQuery = useQuery({
     queryKey: ['orders'],
     queryFn: () => apiRequest('/orders')
@@ -216,6 +222,7 @@ export default function DashboardAdminPage() {
                 <th className="p-3 text-left">Itens</th>
                 <th className="p-3 text-left">Valor Total</th>
                 <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Recibo</th>
               </tr>
             </thead>
             <tbody>
@@ -239,6 +246,22 @@ export default function DashboardAdminPage() {
                         {statusPT[order.status] || order.status}
                       </span>
                     </td>
+                    <td className="p-3">
+                      {order.status === 'APPROVED' && (
+                        <button
+                          className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                          title="Emitir recibo"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setShowIssuerModal(true);
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="white" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6m-6 0a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2m-6 0v2a2 2 0 002 2h2a2 2 0 002-2v-2" />
+                          </svg>
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -248,6 +271,25 @@ export default function DashboardAdminPage() {
       </div>
         </>
       )}
+      {/* Modal de confirmação de emissão de recibo */}
+      <ReceiptIssuerModal
+        isOpen={showIssuerModal}
+        onClose={() => setShowIssuerModal(false)}
+        order={selectedOrder}
+        onEmit={() => {
+          setShowIssuerModal(false);
+          setShowReceiptModal(true);
+        }}
+      />
+      {/* Modal de visualização/geração do recibo */}
+      <ReceiptTemplate
+        isOpen={showReceiptModal}
+        onClose={() => {
+          setShowReceiptModal(false);
+          setSelectedOrder(null);
+        }}
+        orderData={selectedOrder}
+      />
     </div>
   );
 }

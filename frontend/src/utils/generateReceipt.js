@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { formatCurrency as formatCurrencyUtil } from './currency';
+import extenso from 'extenso';
 
 /**
  * Formata data para exibição no recibo
@@ -59,21 +60,51 @@ export const generateReceiptPDF = (orderData) => {
 
   let yPosition = 10;
 
-  // Cabeçalho
-  doc.setFontSize(14);
+  // Cabeçalho personalizado do emissor
+  doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('SISTEMA DE REVISTAS EBD', 40, yPosition, { align: 'center' });
-  
-  yPosition += 6;
+  doc.text('Superintendência das Escolas Bíblicas', 40, yPosition, { align: 'center' });
+  yPosition += 5;
+  doc.setFontSize(10);
+  doc.text('Campo Taquaralto', 40, yPosition, { align: 'center' });
+  yPosition += 7;
+  // Retângulo com cantos arredondados para o texto do recibo
+  const boxX = 5;
+  const boxWidth = 70;
+  const boxRadius = 4;
+  let boxY = yPosition;
   doc.setFontSize(12);
-  doc.text('EXTRATO DE PEDIDO', 40, yPosition, { align: 'center' });
-  
-  yPosition += 8;
-  
+  doc.setFont('helvetica', 'bold');
+  doc.text('RECIBO', boxX + boxWidth / 2, boxY + 6, { align: 'center' });
+  let contentY = boxY + 12;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  const nomeRecebido = orderData.congregation?.name || 'N/A';
+  const valor = totalPrice;
+  let valorExtenso = '';
+  try {
+    valorExtenso = extenso(valor, { mode: 'currency', currency: { type: 'BRL' }, ignoreZero: true });
+  } catch {
+    valorExtenso = '';
+  }
+  const frase = `Recebemos de: ${nomeRecebido}, a importância de ${formatCurrency(valor)}${valorExtenso ? ' (' + valorExtenso + ')' : ''}, referente ao pedido das revistas conforme listado abaixo.`;
+  const fraseLines = doc.splitTextToSize(frase, boxWidth - 6);
+  fraseLines.forEach(line => {
+    doc.text(line, boxX + 3, contentY, { align: 'justify' });
+    contentY += 5;
+  });
+  // Reduz o padding inferior
+  contentY += 0.5;
+  // Calcula altura do box
+  const boxHeight = contentY - boxY + 2;
+  // Desenha o retângulo com cantos arredondados
+  doc.setDrawColor(60);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(boxX, boxY, boxWidth, boxHeight, boxRadius, boxRadius);
+  yPosition = contentY + 6;
   // Linha divisória
   doc.setLineWidth(0.5);
   doc.line(5, yPosition, 75, yPosition);
-  
   yPosition += 6;
 
   // Informações do pedido
@@ -88,7 +119,7 @@ export const generateReceiptPDF = (orderData) => {
   yPosition += 7;
   
   const userName = orderData.submittedBy?.name || orderData.user?.name || 'N/A';
-  doc.text(`Usuário: ${userName}`, 5, yPosition);
+  doc.text(`Responsável: ${userName}`, 5, yPosition);
   yPosition += 5;
   
   doc.text(`Congregação: ${orderData.congregation?.name || 'N/A'}`, 5, yPosition);
@@ -176,18 +207,28 @@ export const generateReceiptPDF = (orderData) => {
   // Status e data de geração
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  
   const statusText = orderData.status === 'PENDING' || orderData.status === 'pending' ? 'Pendente' : 
                     orderData.status === 'APPROVED' || orderData.status === 'confirmed' ? 'Pago' : 
                     orderData.status === 'DELIVERED' ? 'Entregue' :
                     orderData.status === 'CANCELED' || orderData.status === 'cancelled' ? 'Cancelado' : 
                     'Pendente';
-  
   doc.text(`Status: ${statusText}`, 5, yPosition);
   yPosition += 5;
-  
   const now = new Date();
   doc.text(`Gerado em: ${formatDate(now)}`, 5, yPosition);
+  yPosition += 10;
+  // Assinatura do superintendente
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('_____________________________', 40, yPosition, { align: 'center' });
+  yPosition += 5;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Denilson Maciel', 40, yPosition, { align: 'center' });
+  yPosition += 4;
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Superintendente', 40, yPosition, { align: 'center' });
 
   // Retorna o PDF como Blob
   return doc.output('blob');
