@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { formatCurrency as formatCurrencyUtil } from './currency';
-import extenso from 'extenso';
+import extensoReais from './extensoReais';
 
 /**
  * Formata data para exibição no recibo
@@ -81,12 +81,7 @@ export const generateReceiptPDF = (orderData) => {
   doc.setFont('helvetica', 'normal');
   const nomeRecebido = orderData.congregation?.name || 'N/A';
   const valor = totalPrice;
-  let valorExtenso = '';
-  try {
-    valorExtenso = extenso(valor, { mode: 'currency', currency: { type: 'BRL' }, ignoreZero: true });
-  } catch {
-    valorExtenso = '';
-  }
+  let valorExtenso = extensoReais(valor);
   const frase = `Recebemos de: ${nomeRecebido}, a importância de ${formatCurrency(valor)}${valorExtenso ? ' (' + valorExtenso + ')' : ''}, referente ao pedido das revistas conforme listado abaixo.`;
   const fraseLines = doc.splitTextToSize(frase, boxWidth - 6);
   fraseLines.forEach(line => {
