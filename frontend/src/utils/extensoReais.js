@@ -13,25 +13,29 @@ function extensoReais(valor) {
   const centavos = Math.round((valor - inteiro) * 100);
 
   let extenso = '';
-  // Centenas
-  if (inteiro >= 100) {
-    if (inteiro === 100) {
-      extenso += 'cem';
-    } else {
-      extenso += centenas[Math.floor(inteiro / 100)];
+  // Centenas, dezenas e unidades
+  if (inteiro === 0) {
+    extenso += 'zero';
+  } else {
+    const c = Math.floor(inteiro / 100);
+    const d = Math.floor((inteiro % 100) / 10);
+    const u = inteiro % 10;
+    if (c > 0) {
+      if (inteiro === 100) {
+        extenso += 'cem';
+      } else {
+        extenso += centenas[c];
+      }
+      if (inteiro % 100 !== 0) extenso += ' e ';
     }
-    if (inteiro % 100 !== 0) extenso += ' e ';
-  }
-  // Dezenas
-  const dez = Math.floor((inteiro % 100) / 10);
-  const uni = inteiro % 10;
-  if (dez === 1) {
-    extenso += dezenas[uni];
-  } else if (dez > 1) {
-    extenso += dezenas2[dez];
-    if (uni > 0) extenso += ' e ' + unidades[uni];
-  } else if (uni > 0 || inteiro === 0) {
-    extenso += unidades[uni];
+    if (d === 1) {
+      extenso += dezenas[u];
+    } else if (d > 1) {
+      extenso += dezenas2[d];
+      if (u > 0) extenso += ' e ' + unidades[u];
+    } else if (u > 0 && d === 0) {
+      extenso += unidades[u];
+    }
   }
   if (inteiro > 0) extenso += ' reais';
   if (centavos > 0) {
