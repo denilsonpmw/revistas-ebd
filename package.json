@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "extenso": "^2.1.0"
+    "@prisma/client": "^6.7.0",
+    "extenso": "^2.1.0",
+    "prisma": "^6.7.0"
   }
 }

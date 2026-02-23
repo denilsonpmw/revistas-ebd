@@ -39,7 +39,7 @@ app.use('/orders', authRequired, ordersRoutes);
 app.use('/admin', authRequired, adminRoutes);
 app.use('/magazines', authRequired, magazinesRoutes);
 app.use('/variants', authRequired, variantsRoutes);
-app.use('/periods', authRequired, periodsRoutes);
+app.use('/periods', periodsRoutes);
 app.use('/users', authRequired, usersRoutes);
 
 if (fs.existsSync(webDist)) {

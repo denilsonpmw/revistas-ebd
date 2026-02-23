@@ -15,6 +15,7 @@ const normalizeDate = (dateString) => {
   return new Date(dateString + 'T12:00:00.000Z');
 };
 
+const { authRequired } = require('../middleware/auth');
 const router = express.Router();
 
 // Zod validation schemas
@@ -47,7 +48,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET all periods (admin - includes inactive)
-router.get('/admin/all', async (req, res) => {
+router.get('/admin/all', authRequired, async (req, res) => {
   try {
     // Verify user is ADMIN
     if (!req.user || req.user.role !== 'ADMIN') {
@@ -63,7 +64,7 @@ router.get('/admin/all', async (req, res) => {
 });
 
 // POST create period (admin only)
-router.post('/', async (req, res) => {
+router.post('/', authRequired, async (req, res) => {
   try {
     // Verify user is ADMIN
     if (!req.user || req.user.role !== 'ADMIN') {
@@ -91,7 +92,7 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH update period (admin only)
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', authRequired, async (req, res) => {
   try {
     // Verify user is ADMIN
     if (!req.user || req.user.role !== 'ADMIN') {

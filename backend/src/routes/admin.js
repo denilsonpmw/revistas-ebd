@@ -4,6 +4,72 @@ const { requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Relatório global de pedidos aprovados (sem filtro de congregação ou período)
+router.get('/report-all-orders', async (req, res) => {
+  const periodId = String(req.query.periodId || '').trim();
+  if (!periodId) {
+    return res.status(400).json({ message: 'Período obrigatório' });
+  }
+
+  const period = await prisma.period.findUnique({ where: { id: periodId } });
+  if (!period) {
+    return res.status(404).json({ message: 'Período não encontrado' });
+  }
+
+  // Busca todos os pedidos aprovados do período
+  const orders = await prisma.order.findMany({
+    where: { status: 'APPROVED', periodId },
+    include: {
+      items: {
+        include: {
+          magazine: true,
+          variantCombination: true
+        }
+      }
+    }
+  });
+
+  // Agrupa por revista + variação
+  const groupedMap = new Map();
+  for (const order of orders) {
+    for (const item of order.items) {
+      const variantKey = item.combinationId
+        || item.variantCombination?.id
+        || item.variantCombination?.code
+        || item.variantData?.combinationId
+        || item.variantData?.combinationCode
+        || 'no-variant';
+      const key = `${item.magazineId}-${variantKey}`;
+
+      const variantCode = item.variantCombination?.code
+        || item.variantData?.code
+        || item.variantData?.combinationCode
+        || '-';
+      const variantName = item.variantCombination?.name
+        || item.variantData?.name
+        || item.variantData?.combinationName
+        || 'Sem variação';
+
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, {
+          variantCode,
+          magazineName: item.magazine.name,
+          variantName,
+          quantity: 0,
+          unitPrice: Number(item.unitPrice || 0),
+          totalValue: 0
+        });
+      }
+      const entry = groupedMap.get(key);
+      entry.quantity += item.quantity;
+      entry.totalValue += Number(item.totalValue);
+    }
+  }
+
+  const rows = Array.from(groupedMap.values());
+  return res.json({ rows });
+});
+
 router.use(requireRole(['ADMIN']));
 
 router.get('/areas', async (req, res) => {
