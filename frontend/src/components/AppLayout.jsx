@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -8,6 +9,16 @@ import ThemeToggle from './ThemeToggle.jsx';
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
+
+  // Buscar pedidos do usuário para mostrar badge de pendentes
+  const ordersQuery = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => apiRequest('/orders'),
+    refetchInterval: 10000
+  });
+  const orders = ordersQuery.data?.orders || [];
+  const myOrders = user ? orders.filter(o => o.congregationId === user.congregationId) : [];
+  const pendingOrders = myOrders.filter(o => o.status === 'PENDING').length;
   const [showChangePassword, setShowChangePassword] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -67,10 +78,15 @@ export default function AppLayout() {
             <NavLink
               to="/app/pedidos"
               className={({ isActive }) =>
-                isActive ? 'text-emerald-400' : 'text-slate-300'
+                'relative ' + (isActive ? 'text-emerald-400' : 'text-slate-300')
               }
             >
               Pedidos
+              {pendingOrders > 0 && (
+                <span className="absolute -top-2 -right-3 bg-yellow-500 text-xs text-black font-bold rounded-full px-2 py-0.5 shadow">
+                  {pendingOrders}
+                </span>
+              )}
             </NavLink>
 
             {user?.role === 'ADMIN' && (
@@ -83,6 +99,14 @@ export default function AppLayout() {
                   Cadastros
                 </button>
                 <div className="absolute left-0 top-full mt-0 hidden min-w-[220px] rounded-lg border border-slate-800 bg-slate-900 shadow-xl group-hover:block hover:block">
+                  <NavLink
+                    to="/app/congregacoes"
+                    className={({ isActive }) =>
+                      `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
+                    }
+                  >
+                    Congregações
+                  </NavLink>
                   <NavLink
                     to="/app/revistas-admin"
                     className={({ isActive }) =>
@@ -136,6 +160,16 @@ export default function AppLayout() {
                 >
                   Relatórios
                 </NavLink>
+                {user?.role === 'ADMIN' && (
+                  <a
+                    href="/global-orders-report"
+                    className="block px-4 py-2 text-sm text-slate-300 hover:text-slate-100 transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Relatório Geral
+                  </a>
+                )}
               </div>
             </div>
 
@@ -213,10 +247,15 @@ export default function AppLayout() {
           <NavLink
             to="/app/pedidos"
             className={({ isActive }) =>
-              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+              `relative whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
             }
           >
             Pedidos
+            {pendingOrders > 0 && (
+              <span className="absolute -top-1 -right-2 bg-yellow-500 text-xs text-black font-bold rounded-full px-1.5 py-0.5 shadow">
+                {pendingOrders}
+              </span>
+            )}
           </NavLink>
           <NavLink
             to="/app/revistas"

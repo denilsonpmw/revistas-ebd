@@ -536,8 +536,14 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
         <button
           onClick={() => navigate('/app/pedidos')}
-          className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-left hover:border-slate-700 transition-colors"
+          className="relative rounded-lg border border-slate-800 bg-slate-900 p-6 text-left hover:border-slate-700 transition-colors"
         >
+          {/* Badge de pedidos pendentes */}
+          {pendingOrders > 0 && (
+            <span className="absolute top-2 right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full z-10">
+              {pendingOrders}
+            </span>
+          )}
           <div className="text-3xl mb-3">📝</div>
           <div className="font-semibold mb-1">Novo Pedido</div>
           <div className="text-sm text-slate-400">Criar um novo pedido</div>

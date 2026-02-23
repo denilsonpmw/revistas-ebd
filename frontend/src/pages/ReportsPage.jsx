@@ -213,7 +213,7 @@ export default function ReportsPage() {
         <div className="no-print">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Relatórios de Pedidos</h2>
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
               <button
                 onClick={handlePrint}
                 disabled={!periodId || !rows.length}
@@ -228,6 +228,7 @@ export default function ReportsPage() {
               >
                 📄 Salvar PDF
               </button>
+
             </div>
           </div>
 

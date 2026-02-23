@@ -60,47 +60,62 @@ export const generateReceiptPDF = (orderData) => {
 
   let yPosition = 10;
 
-  // Cabeçalho personalizado do emissor
+  // Cabeçalho
+  const isPaid = orderData.status === 'APPROVED' || orderData.status === 'confirmed';
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('Superintendência das Escolas Bíblicas', 40, yPosition, { align: 'center' });
-  yPosition += 5;
-  doc.setFontSize(10);
-  doc.text('Campo Taquaralto', 40, yPosition, { align: 'center' });
-  yPosition += 7;
-  // Retângulo com cantos arredondados para o texto do recibo
-  const boxX = 5;
-  const boxWidth = 70;
-  const boxRadius = 4;
-  let boxY = yPosition;
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('RECIBO', boxX + boxWidth / 2, boxY + 6, { align: 'center' });
-  let contentY = boxY + 12;
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  const nomeRecebido = orderData.congregation?.name || 'N/A';
-  const valor = totalPrice;
-  let valorExtenso = extensoReais(valor);
-  const frase = `Recebemos de: ${nomeRecebido}, a importância de ${formatCurrency(valor)}${valorExtenso ? ' (' + valorExtenso + ')' : ''}, referente ao pedido das revistas conforme listado abaixo.`;
-  const fraseLines = doc.splitTextToSize(frase, boxWidth - 6);
-  fraseLines.forEach(line => {
-    doc.text(line, boxX + 3, contentY, { align: 'justify' });
-    contentY += 5;
-  });
-  // Reduz o padding inferior
-  contentY += 0.5;
-  // Calcula altura do box
-  const boxHeight = contentY - boxY + 2;
-  // Desenha o retângulo com cantos arredondados
-  doc.setDrawColor(60);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(boxX, boxY, boxWidth, boxHeight, boxRadius, boxRadius);
-  yPosition = contentY + 6;
-  // Linha divisória
-  doc.setLineWidth(0.5);
-  doc.line(5, yPosition, 75, yPosition);
-  yPosition += 6;
+  if (isPaid) {
+    doc.text('Superintendência das Escolas Bíblicas', 40, yPosition, { align: 'center' });
+    yPosition += 5;
+    doc.setFontSize(10);
+    doc.text('Campo Taquaralto', 40, yPosition, { align: 'center' });
+    yPosition += 7;
+    // Retângulo com cantos arredondados para o texto do recibo
+    const boxX = 5;
+    const boxWidth = 70;
+    const boxRadius = 4;
+    let boxY = yPosition;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RECIBO', boxX + boxWidth / 2, boxY + 6, { align: 'center' });
+    let contentY = boxY + 12;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    const nomeRecebido = orderData.congregation?.name || 'N/A';
+    const valor = totalPrice;
+    let valorExtenso = extensoReais(valor);
+    const frase = `Recebemos de: ${nomeRecebido}, a importância de ${formatCurrency(valor)}${valorExtenso ? ' (' + valorExtenso + ')' : ''}, referente ao pedido das revistas conforme listado abaixo.`;
+    const fraseLines = doc.splitTextToSize(frase, boxWidth - 6);
+    fraseLines.forEach(line => {
+      doc.text(line, boxX + 3, contentY, { align: 'justify' });
+      contentY += 5;
+    });
+    // Reduz o padding inferior
+    contentY += 0.5;
+    // Calcula altura do box
+    const boxHeight = contentY - boxY + 2;
+    // Desenha o retângulo com cantos arredondados
+    doc.setDrawColor(60);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(boxX, boxY, boxWidth, boxHeight, boxRadius, boxRadius);
+    yPosition = contentY + 6;
+    // Linha divisória
+    doc.setLineWidth(0.5);
+    doc.line(5, yPosition, 75, yPosition);
+    yPosition += 6;
+  } else {
+    // Extrato antigo (sem quadrado, sem frase de pagamento)
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SISTEMA DE REVISTAS EBD', 40, yPosition, { align: 'center' });
+    yPosition += 12;
+    doc.setFontSize(16);
+    doc.text('EXTRATO DE PEDIDO', 40, yPosition, { align: 'center' });
+    yPosition += 12;
+    doc.setLineWidth(1.2);
+    doc.line(5, yPosition, 75, yPosition);
+    yPosition += 8;
+  }
 
   // Informações do pedido
   doc.setFontSize(9);

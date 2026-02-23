@@ -93,20 +93,22 @@ export default function OrderMobilePage() {
   });
 
   // Query: Buscar pedidos do usuário
-  const { data: userOrders = [] } = useQuery({
+  const { data: userOrdersRaw = [] } = useQuery({
     queryKey: ['orders', 'user'],
     queryFn: async () => {
       const data = await apiRequest('/orders');
       const orders = data.orders || [];
-      // Retornar apenas os 5 mais recentes (considerando edições)
-      const sorted = [...orders].sort((a, b) => {
-        const aDate = new Date(a.updatedAt || a.createdAt);
-        const bDate = new Date(b.updatedAt || b.createdAt);
-        return bDate - aDate;
-      });
-      return sorted.slice(0, 5);
+      return orders;
     }
   });
+
+  // Para exibição dos últimos pedidos, use os 5 mais recentes
+  const userOrders = [...userOrdersRaw].sort((a, b) => {
+    const aDate = new Date(a.updatedAt || a.createdAt);
+    const bDate = new Date(b.updatedAt || b.createdAt);
+    return bDate - aDate;
+  });
+  const recentUserOrders = userOrders.slice(0, 5);
 
   // Query: Buscar período ativo e calcular dias restantes
   const { data: periodData } = useQuery({
@@ -355,7 +357,7 @@ export default function OrderMobilePage() {
         setAlertState({
           isOpen: true,
           title: 'Pedido Pendente',
-          message: 'Você não pode fazer um novo pedido enquanto houver um pedido pendente. Aguarde a aprovação do seu pedido anterior ou cancele-o.',
+          message: 'Você possui um pedido pendente. Clique em "Pedido Pendente" e continue de onde parou.',
           type: 'warning'
         });
         return;
@@ -630,9 +632,9 @@ export default function OrderMobilePage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {userOrders.length > 0 && (
-                <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
-                  {userOrders.length}
+              {userOrders.filter(order => order.status === 'PENDING').length > 0 && (
+                <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+                  {userOrders.filter(order => order.status === 'PENDING').length}
                 </span>
               )}
             </button>
@@ -856,7 +858,7 @@ export default function OrderMobilePage() {
                   : 'bg-emerald-600/20 text-emerald-300 border-emerald-600/40'
               }`}>
                 {daysRemaining > 0 ? (
-                  <>Faltam {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}</>
+                  <>{daysRemaining === 1 ? 'Falta' : 'Faltam'} {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}</>
                 ) : (
                   <>Fecha hoje</>
                 )}
@@ -930,9 +932,16 @@ export default function OrderMobilePage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            {userOrders.length > 0 && (
+            {/* Badge para pedidos pendentes */}
+            {userOrders.filter(order => order.status === 'PENDING').length > 0 && (
               <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
-                {userOrders.length}
+                {userOrders.filter(order => order.status === 'PENDING').length}
+              </span>
+            )}
+            {/* Badge para pedidos pagos (se não houver pendentes) */}
+            {userOrders.filter(order => order.status === 'PENDING').length === 0 && userOrders.filter(order => order.status === 'APPROVED').length > 0 && (
+              <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+                {userOrders.filter(order => order.status === 'APPROVED').length}
               </span>
             )}
           </button>

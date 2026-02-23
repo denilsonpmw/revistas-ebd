@@ -16,7 +16,7 @@ export const FloatingCart = ({ items = [], onFinalize, onPendingOrder = null, ha
 
   return (
     <div
-      className="fixed left-0 right-0 bg-slate-900 border-t border-slate-700 shadow-2xl z-50 animate-slide-up"
+      className="fixed left-0 right-0 border-t border-slate-700 shadow-2xl z-50 animate-slide-up bg-transparent backdrop-blur"
       style={{ bottom: bottomOffset }}
     >
       <div className="max-w-md mx-auto px-4 py-3">
@@ -33,7 +33,7 @@ export const FloatingCart = ({ items = [], onFinalize, onPendingOrder = null, ha
         {hasPendingOrder && !isEditing && (
           <div className="bg-yellow-600/20 border border-yellow-600/30 rounded px-3 py-2 mb-3">
             <div className="text-yellow-400 text-xs font-semibold">
-              ⚠️ Você possui um pedido pendente. Aguarde a aprovação antes de fazer um novo.
+              ⚠️ Você possui um pedido pendente. Clique em "Pedido Pendente" e continue de onde parou.
             </div>
           </div>
         )}

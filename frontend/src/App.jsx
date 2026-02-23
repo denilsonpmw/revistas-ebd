@@ -15,6 +15,8 @@ import PeriodsPage from './pages/PeriodsPage.jsx';
 import UsersPage from './pages/UsersPage.jsx';
 import OrderMobilePage from './pages/OrderMobilePage.jsx';
 import AppLayout from './components/AppLayout.jsx';
+import GlobalOrdersReportPage from './pages/GlobalOrdersReportPage.jsx';
+import CongregationsPage from './pages/CongregationsPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -47,6 +49,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        <Route path="/global-orders-report" element={<AdminRoute><GlobalOrdersReportPage /></AdminRoute>} />
         <Route path="/" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/verificar" element={<VerifyPage />} />
@@ -71,6 +74,7 @@ export default function App() {
           <Route path="pedidos" element={<OrdersPage />} />
           <Route path="relatorios" element={<ReportsPage />} />
           <Route path="revistas" element={<MagazinesCatalogPage />} />
+          <Route path="congregacoes" element={<AdminRoute><CongregationsPage /></AdminRoute>} />
           <Route path="revistas-admin" element={<AdminRoute><MagazinesPage /></AdminRoute>} />
           <Route path="revistas-variacoes" element={<AdminRoute><MagazineVariantsPage /></AdminRoute>} />
           <Route path="periodos" element={<AdminRoute><PeriodsPage /></AdminRoute>} />
