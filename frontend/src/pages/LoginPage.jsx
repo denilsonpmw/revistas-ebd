@@ -69,7 +69,8 @@ export default function LoginPage() {
           )
         : 0;
       return { nextPeriod, daysRemaining };
-    }
+    },
+    retry: false
   });
 
   let periodBanner = null;

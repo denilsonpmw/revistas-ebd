@@ -161,14 +161,14 @@ export default function AppLayout() {
                   Relatórios
                 </NavLink>
                 {user?.role === 'ADMIN' && (
-                  <a
-                    href="/global-orders-report"
-                    className="block px-4 py-2 text-sm text-slate-300 hover:text-slate-100 transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <NavLink
+                    to="/app/global-orders-report"
+                    className={({ isActive }) =>
+                      `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100 transition-colors`
+                    }
                   >
                     Relatório Geral
-                  </a>
+                  </NavLink>
                 )}
               </div>
             </div>

@@ -138,7 +138,7 @@ export default function MagazinesCatalogPage() {
     <>
       <style>{printStyles}</style>
       <div className="min-h-screen bg-slate-950 text-slate-100">
-        <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-6">
           {/* Cabeçalho e Filtros - Não imprime */}
           <div className="no-print">
             <div className="flex items-center justify-between mb-6">

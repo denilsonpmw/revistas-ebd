@@ -49,7 +49,6 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/global-orders-report" element={<AdminRoute><GlobalOrdersReportPage /></AdminRoute>} />
         <Route path="/" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/verificar" element={<VerifyPage />} />
@@ -79,6 +78,7 @@ export default function App() {
           <Route path="revistas-variacoes" element={<AdminRoute><MagazineVariantsPage /></AdminRoute>} />
           <Route path="periodos" element={<AdminRoute><PeriodsPage /></AdminRoute>} />
           <Route path="usuarios" element={<AdminRoute><UsersPage /></AdminRoute>} />
+          <Route path="global-orders-report" element={<AdminRoute><GlobalOrdersReportPage /></AdminRoute>} />
         </Route>
       </Routes>
     </AuthProvider>
