@@ -108,19 +108,7 @@ export default function DashboardAdminPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Painel</h2>
-        {/* Tabs de navegação */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`rounded px-4 py-2 text-sm font-semibold ${
-              activeTab === 'dashboard'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            Dashboard
-          </button>
-        </div>
+        {/* Tabs de navegação removidos */}
       </div>
 
       {activeTab === 'congregations' ? (

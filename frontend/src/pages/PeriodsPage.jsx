@@ -73,9 +73,9 @@ export default function PeriodsPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 p-4">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto w-full">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Períodos de Revistas</h1>
+          <h1 className="text-2xl font-bold text-slate-100">Períodos de Revistas</h1>
           <button
             onClick={() => setShowForm(!showForm)}
             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
