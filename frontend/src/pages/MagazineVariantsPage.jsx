@@ -10,6 +10,12 @@ export default function MagazineVariantsPage() {
   const [newComboCode, setNewComboCode] = useState('');
   const [newComboPrice, setNewComboPrice] = useState('');
   const [newComboVariantData, setNewComboVariantData] = useState({});
+  // Estado para edição
+  const [editingComboId, setEditingComboId] = useState(null);
+  const [editComboName, setEditComboName] = useState('');
+  const [editComboCode, setEditComboCode] = useState('');
+  const [editComboPrice, setEditComboPrice] = useState('');
+  const [editComboVariantData, setEditComboVariantData] = useState({});
   const queryClient = useQueryClient();
 
   const magazinesQuery = useQuery({
@@ -84,6 +90,48 @@ export default function MagazineVariantsPage() {
       price: newComboPrice,
       variantData: newComboVariantData
     });
+  };
+
+  // Função para iniciar edição
+  const handleEditCombo = (combo) => {
+    setEditingComboId(combo.id);
+    setEditComboName(combo.name);
+    setEditComboCode(combo.code);
+    setEditComboPrice(combo.price);
+    setEditComboVariantData(combo.variantData || {});
+    setShowNewCombo(false);
+  };
+
+  // Função para salvar edição
+  const handleSaveEditCombo = () => {
+    if (!editComboName.trim() || !editComboCode.trim() || !editComboPrice) {
+      toast.error('Preencha o nome, código e preço da combinação');
+      return;
+    }
+    updateCombinationMutation.mutate({
+      combinationId: editingComboId,
+      name: editComboName,
+      code: editComboCode,
+      price: editComboPrice,
+      variantData: editComboVariantData
+    }, {
+      onSuccess: () => {
+        setEditingComboId(null);
+        setEditComboName('');
+        setEditComboCode('');
+        setEditComboPrice('');
+        setEditComboVariantData({});
+      }
+    });
+  };
+
+  // Função para cancelar edição
+  const handleCancelEdit = () => {
+    setEditingComboId(null);
+    setEditComboName('');
+    setEditComboCode('');
+    setEditComboPrice('');
+    setEditComboVariantData({});
   };
 
   return (
@@ -201,29 +249,86 @@ export default function MagazineVariantsPage() {
                   <h3 className="text-lg font-semibold">Combinações de Preços ({selectedMagazine.variantCombinations.length})</h3>
                   {selectedMagazine.variantCombinations.map((combo) => (
                     <div key={combo.id} className="rounded border border-slate-800 bg-slate-900 p-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <h4 className="font-semibold text-lg">{combo.name}</h4>
-                            <span className="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">{combo.code}</span>
+                      {editingComboId === combo.id ? (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm text-slate-400 mb-2">Nome da Combinação</label>
+                            <input
+                              type="text"
+                              value={editComboName}
+                              onChange={(e) => setEditComboName(e.target.value)}
+                              className="w-full rounded bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
                           </div>
-                          <p className="text-sm text-slate-400 mt-1">{formatCurrency(combo.price)}</p>
-                          {combo.variantData && Object.keys(combo.variantData).length > 0 && (
-                            <div className="text-xs text-slate-400 mt-2">
-                              {Object.entries(combo.variantData).map(([key, value]) => (
-                                <div key={key}>{key}: {value}</div>
-                              ))}
-                            </div>
-                          )}
+                          <div>
+                            <label className="block text-sm text-slate-400 mb-2">Código da Combinação</label>
+                            <input
+                              type="text"
+                              value={editComboCode}
+                              onChange={(e) => setEditComboCode(e.target.value.toUpperCase())}
+                              className="w-full rounded bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-slate-400 mb-2">Preço (R$)</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editComboPrice}
+                              onChange={(e) => setEditComboPrice(e.target.value)}
+                              className="w-full rounded bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleSaveEditCombo}
+                              disabled={updateCombinationMutation.isPending}
+                              className="flex-1 rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                            >
+                              {updateCombinationMutation.isPending ? 'Salvando...' : 'Salvar'}
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="flex-1 rounded bg-slate-700 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-600"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => deleteCombinationMutation.mutate(combo.id)}
-                          disabled={deleteCombinationMutation.isPending}
-                          className="text-red-400 hover:text-red-300 text-sm font-semibold"
-                        >
-                          Deletar
-                        </button>
-                      </div>
+                      ) : (
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <h4 className="font-semibold text-lg">{combo.name}</h4>
+                              <span className="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">{combo.code}</span>
+                            </div>
+                            <p className="text-sm text-slate-400 mt-1">{formatCurrency(combo.price)}</p>
+                            {combo.variantData && Object.keys(combo.variantData).length > 0 && (
+                              <div className="text-xs text-slate-400 mt-2">
+                                {Object.entries(combo.variantData).map(([key, value]) => (
+                                  <div key={key}>{key}: {value}</div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col gap-2 items-end">
+                            <button
+                              onClick={() => handleEditCombo(combo)}
+                              className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => deleteCombinationMutation.mutate(combo.id)}
+                              disabled={deleteCombinationMutation.isPending}
+                              className="text-red-400 hover:text-red-300 text-sm font-semibold"
+                            >
+                              Deletar
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
