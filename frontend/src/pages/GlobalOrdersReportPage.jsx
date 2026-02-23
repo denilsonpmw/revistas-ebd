@@ -59,7 +59,7 @@ export default function GlobalOrdersReportPage() {
 
   const reportQuery = useQuery({
     queryKey: ['global-orders-report', periodId],
-    queryFn: () => apiRequest('/admin/report-all-orders'),
+    queryFn: () => apiRequest(`/admin/report-all-orders?periodId=${encodeURIComponent(periodId)}`),
     enabled: Boolean(periodId) && isAdmin
   });
 
