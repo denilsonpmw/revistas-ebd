@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '../api/client';
+import { formatCurrency } from '../utils/currency';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function MagazinesCatalogMobilePage() {
@@ -53,7 +54,12 @@ export default function MagazinesCatalogMobilePage() {
                   {mag.variantCombinations && mag.variantCombinations.length > 0 ? (
                     <ul className="list-disc ml-4">
                       {mag.variantCombinations.map((variant) => (
-                        <li key={variant.id}>{variant.name}</li>
+                        <li key={variant.id}>
+                          {variant.name}
+                          {typeof variant.price !== 'undefined' && variant.price !== null && (
+                            <span className="ml-2 text-emerald-400 font-semibold">{formatCurrency(variant.price)}</span>
+                          )}
+                        </li>
                       ))}
                     </ul>
                   ) : (
