@@ -11,6 +11,7 @@ import ReportsPage from './pages/ReportsPage.jsx';
 import MagazinesPage from './pages/MagazinesPage.jsx';
 import MagazineVariantsPage from './pages/MagazineVariantsPage.jsx';
 import MagazinesCatalogPage from './pages/MagazinesCatalogPage.jsx';
+import MagazinesCatalogMobilePage from './pages/MagazinesCatalogMobilePage.jsx';
 import PeriodsPage from './pages/PeriodsPage.jsx';
 import UsersPage from './pages/UsersPage.jsx';
 import OrderMobilePage from './pages/OrderMobilePage.jsx';
@@ -61,6 +62,16 @@ export default function App() {
             </MobileRoute>
           }
         />
+        {/* Catálogo mobile fora do AppLayout - só renderiza se mobile */}
+        <Route
+          path="/app/revistas-mobile"
+          element={
+            <MobileRoute>
+              <MagazinesCatalogMobilePage />
+            </MobileRoute>
+          }
+        />
+        {/* Catálogo desktop/admin dentro do AppLayout */}
         <Route
           path="/app"
           element={
@@ -69,17 +80,17 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<DashboardRoute />} />
-          <Route path="pedidos" element={<OrdersPage />} />
-          <Route path="relatorios" element={<ReportsPage />} />
-          <Route path="revistas" element={<MagazinesCatalogPage />} />
-          <Route path="congregacoes" element={<AdminRoute><CongregationsPage /></AdminRoute>} />
-          <Route path="revistas-admin" element={<AdminRoute><MagazinesPage /></AdminRoute>} />
-          <Route path="revistas-variacoes" element={<AdminRoute><MagazineVariantsPage /></AdminRoute>} />
-          <Route path="periodos" element={<AdminRoute><PeriodsPage /></AdminRoute>} />
-          <Route path="usuarios" element={<AdminRoute><UsersPage /></AdminRoute>} />
-          <Route path="global-orders-report" element={<AdminRoute><GlobalOrdersReportPage /></AdminRoute>} />
-        </Route>
+            <Route index element={<DashboardRoute />} />
+            <Route path="pedidos" element={<OrdersPage />} />
+            <Route path="relatorios" element={<ReportsPage />} />
+            <Route path="revistas" element={<MagazinesCatalogPage />} />
+            <Route path="congregacoes" element={<AdminRoute><CongregationsPage /></AdminRoute>} />
+            <Route path="revistas-admin" element={<AdminRoute><MagazinesPage /></AdminRoute>} />
+            <Route path="revistas-variacoes" element={<AdminRoute><MagazineVariantsPage /></AdminRoute>} />
+            <Route path="periodos" element={<AdminRoute><PeriodsPage /></AdminRoute>} />
+            <Route path="usuarios" element={<AdminRoute><UsersPage /></AdminRoute>} />
+            <Route path="global-orders-report" element={<AdminRoute><GlobalOrdersReportPage /></AdminRoute>} />
+          </Route>
       </Routes>
     </AuthProvider>
   );

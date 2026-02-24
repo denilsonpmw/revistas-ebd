@@ -914,6 +914,22 @@ export default function OrderMobilePage() {
       {/* Ações no rodapé */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
         <div className="max-w-md mx-auto flex items-center justify-center gap-2 px-4 py-2">
+                  <button
+                    onClick={() => window.location.assign('/app/revistas-mobile')}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg transition-all duration-200 text-xs font-semibold min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    title="Catálogo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+                      <path d="M4 19V5C4 4.44772 4.44772 4 5 4H9C10.6569 4 12.3431 4.5 14 5.5C15.6569 4.5 17.3431 4 19 4H19C19.5523 4 20 4.44772 20 5V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19Z" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M12 5.5V19" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <rect x="7" y="8" width="5" height="2" rx="0.5" stroke="white" strokeWidth="1.5"/>
+                      <rect x="7" y="11" width="5" height="2" rx="0.5" stroke="white" strokeWidth="1.5"/>
+                      <rect x="7" y="14" width="3" height="1" rx="0.5" stroke="white" strokeWidth="1.5"/>
+                      <rect x="14" y="8" width="3" height="2" rx="0.5" stroke="white" strokeWidth="1.5"/>
+                      <rect x="14" y="11" width="3" height="2" rx="0.5" stroke="white" strokeWidth="1.5"/>
+                      <rect x="14" y="14" width="2" height="1" rx="0.5" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </button>
           <button
             onClick={() => setIsOrdersModalOpen(true)}
             disabled={userOrders.length === 0}

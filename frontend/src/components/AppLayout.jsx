@@ -135,6 +135,14 @@ export default function AppLayout() {
               </div>
             )}
 
+            <NavLink
+              to="/app/revistas-mobile"
+              className={({ isActive }) =>
+                isActive ? 'text-emerald-400' : 'text-slate-300'
+              }
+            >
+              Catálogo
+            </NavLink>
             <div className="relative group">
               <button
                 type="button"
@@ -144,14 +152,6 @@ export default function AppLayout() {
                 Relatórios
               </button>
               <div className="absolute left-0 top-full mt-0 hidden min-w-[200px] rounded-lg border border-slate-800 bg-slate-900 shadow-xl group-hover:block hover:block">
-                <NavLink
-                  to="/app/revistas"
-                  className={({ isActive }) =>
-                    `block px-4 py-2 text-sm ${isActive ? 'text-emerald-400' : 'text-slate-300'} hover:text-slate-100`
-                  }
-                >
-                  Catálogo
-                </NavLink>
                 <NavLink
                   to="/app/relatorios"
                   className={({ isActive }) =>
@@ -239,18 +239,24 @@ export default function AppLayout() {
             to="/app"
             end
             className={({ isActive }) =>
-              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+              `flex flex-col items-center justify-center rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
             }
+            title="Painel"
           >
-            Painel
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5V6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v6.75M3 13.5l9 6 9-6M3 13.5l9-6 9 6" />
+            </svg>
           </NavLink>
           <NavLink
             to="/app/pedidos"
             className={({ isActive }) =>
-              `relative whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+              `relative flex flex-col items-center justify-center rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
             }
+            title="Pedidos"
           >
-            Pedidos
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 9.75V6.75A2.25 2.25 0 0014.25 4.5h-4.5A2.25 2.25 0 007.5 6.75v3M3.75 9.75h16.5M3.75 9.75v7.5A2.25 2.25 0 006 19.5h12a2.25 2.25 0 002.25-2.25v-7.5M3.75 9.75l8.25 6.75 8.25-6.75" />
+            </svg>
             {pendingOrders > 0 && (
               <span className="absolute -top-1 -right-2 bg-yellow-500 text-xs text-black font-bold rounded-full px-1.5 py-0.5 shadow">
                 {pendingOrders}
@@ -258,12 +264,15 @@ export default function AppLayout() {
             )}
           </NavLink>
           <NavLink
-            to="/app/revistas"
+            to="/app/revistas-mobile"
             className={({ isActive }) =>
-              `whitespace-nowrap rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
+              `flex flex-col items-center justify-center rounded px-3 py-2 ${isActive ? 'text-emerald-400' : 'text-slate-300'}`
             }
+            title="Catálogo Mobile"
           >
-            Catálogo
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6.75V19.5m0 0a2.25 2.25 0 01-2.25-2.25V6.75A2.25 2.25 0 0116.5 4.5h-9A2.25 2.25 0 005.25 6.75v10.5A2.25 2.25 0 007.5 19.5m9 0a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-9A2.25 2.25 0 008.25 6.75v10.5A2.25 2.25 0 0010.5 19.5" />
+            </svg>
           </NavLink>
           <NavLink
             to="/app/relatorios"
