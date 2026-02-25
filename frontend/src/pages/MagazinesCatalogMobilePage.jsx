@@ -5,6 +5,7 @@ import { formatCurrency } from '../utils/currency';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function MagazinesCatalogMobilePage() {
+        const [expandedId, setExpandedId] = React.useState(null);
       // Função para extrair valor máximo da faixa etária
       const getAgeRangeSortKey = (ageRange) => {
         if (!ageRange) return -1;
@@ -46,6 +47,9 @@ export default function MagazinesCatalogMobilePage() {
   const magazines = [...magazinesRaw].sort((a, b) => {
     const aKey = getAgeRangeSortKey(a.ageRange);
     const bKey = getAgeRangeSortKey(b.ageRange);
+    // Se a faixa etária for 0, coloca por último
+    if (aKey === 0 && bKey !== 0) return 1;
+    if (bKey === 0 && aKey !== 0) return -1;
     return bKey - aKey;
   });
 
@@ -60,31 +64,46 @@ export default function MagazinesCatalogMobilePage() {
         <div className="text-sm text-blue-600 mt-1 font-medium">{nome} {congregacao && <>• {congregacao}</>}</div>
       </div>
       <div className="grid gap-6">
-        {magazines.map((mag) => (
-          <div key={mag.id} className="rounded-xl bg-white shadow-md border border-blue-100 p-4 flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <span className="text-blue-400 text-2xl">📖</span>
-              <span className="text-lg font-bold text-blue-700 drop-shadow-sm">{mag.className}</span>
-            </div>
-            <div className="mt-2">
-              {mag.variantCombinations && mag.variantCombinations.length > 0 ? (
-                <ul className="space-y-2">
-                  {mag.variantCombinations.map((variant) => (
-                    <li key={variant.id} className="flex items-center gap-2 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
-                      <span className="text-lg text-blue-300">🔖</span>
-                      <span className="font-semibold text-blue-900">{variant.name}</span>
-                      {typeof variant.price !== 'undefined' && variant.price !== null && (
-                        <span className="ml-auto text-emerald-600 font-bold text-base bg-emerald-100 px-2 py-1 rounded-lg">{formatCurrency(variant.price)}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <span className="italic text-blue-400">Sem variações</span>
+        {magazines.map((mag) => {
+          const isExpanded = expandedId === mag.id;
+          return (
+            <div key={mag.id} className="rounded-xl bg-white shadow-md border border-blue-100 p-4 flex flex-col gap-2">
+              <button
+                className="flex items-center gap-3 w-full focus:outline-none"
+                onClick={() => setExpandedId(isExpanded ? null : mag.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`variants-${mag.id}`}
+              >
+                <span className="text-blue-400 text-2xl">📖</span>
+                <span className="text-lg font-bold text-blue-700 drop-shadow-sm flex-1 text-left">{mag.className}</span>
+                <span className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9L12 15L18 9" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </button>
+              {isExpanded && (
+                <div className="mt-2" id={`variants-${mag.id}`}> 
+                  {mag.variantCombinations && mag.variantCombinations.length > 0 ? (
+                    <ul className="space-y-2">
+                      {mag.variantCombinations.map((variant) => (
+                        <li key={variant.id} className="flex items-center gap-2 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
+                          <span className="text-lg text-blue-300">🔖</span>
+                          <span className="font-semibold text-blue-900">{variant.name}</span>
+                          {typeof variant.price !== 'undefined' && variant.price !== null && (
+                            <span className="ml-auto text-emerald-600 font-bold text-base bg-emerald-100 px-2 py-1 rounded-lg">{formatCurrency(variant.price)}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="italic text-blue-400">Sem variações</span>
+                  )}
+                </div>
               )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {/* Botão voltar fixo no rodapé */}
       <button
