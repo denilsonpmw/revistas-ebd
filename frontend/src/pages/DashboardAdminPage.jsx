@@ -16,9 +16,17 @@ export default function DashboardAdminPage() {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [showIssuerModal, setShowIssuerModal] = useState(false);
 
+  const periodsQuery = useQuery({
+    queryKey: ['periods'],
+    queryFn: () => apiRequest('/periods')
+  });
+
+  const activePeriod = periodsQuery.data?.periods?.find(p => p.active);
+
   const ordersQuery = useQuery({
-    queryKey: ['orders'],
-    queryFn: () => apiRequest('/orders')
+    queryKey: ['orders', activePeriod?.id],
+    queryFn: () => apiRequest(`/orders${activePeriod ? `?periodId=${activePeriod.id}` : ''}`),
+    enabled: periodsQuery.isSuccess
   });
 
   const magazinesQuery = useQuery({
@@ -107,8 +115,19 @@ export default function DashboardAdminPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Painel</h2>
-        {/* Tabs de navegação removidos */}
+        <div>
+          <h2 className="text-2xl font-bold">Painel</h2>
+          {activePeriod && (
+            <p className="text-sm text-slate-400 mt-1">
+              Dados do período: <span className="text-blue-400 font-semibold">{activePeriod.name} ({activePeriod.code})</span>
+            </p>
+          )}
+          {!activePeriod && !periodsQuery.isLoading && (
+            <p className="text-sm text-red-400 mt-1 font-semibold italic">
+              ⚠️ Nenhum período ativo selecionado. Exibindo todos os dados (ou nenhum).
+            </p>
+          )}
+        </div>
       </div>
 
       {activeTab === 'congregations' ? (

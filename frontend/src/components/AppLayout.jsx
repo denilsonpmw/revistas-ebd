@@ -9,6 +9,8 @@ import ThemeToggle from './ThemeToggle.jsx';
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isAdmin = user?.role === 'ADMIN';
 
   // Buscar pedidos do usuário para mostrar badge de pendentes
   const ordersQuery = useQuery({
@@ -61,6 +63,16 @@ export default function AppLayout() {
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="border-b border-slate-800">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4">
+          {isAdmin && (
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 text-slate-300 hover:text-white"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+          )}
           <Link to="/app" className="text-lg font-semibold">
             Revistas EBD
           </Link>
@@ -136,7 +148,7 @@ export default function AppLayout() {
             )}
 
             <NavLink
-              to="/app/revistas-mobile"
+              to="/app/revistas"
               className={({ isActive }) =>
                 isActive ? 'text-emerald-400' : 'text-slate-300'
               }
@@ -232,8 +244,8 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Menu inferior (mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur lg:hidden">
+      {/* Menu inferior (mobile) - Oculto para ADMIN */}
+      <nav className={`fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/90 backdrop-blur lg:hidden ${isAdmin ? 'hidden' : ''}`}>
         <div className="flex items-center gap-2 overflow-x-auto px-3 py-2 text-xs text-slate-300">
           <NavLink
             to="/app"
@@ -320,6 +332,44 @@ export default function AppLayout() {
           )}
         </div>
       </nav>
+
+      {/* Sidebar Mobile para ADMIN */}
+      {isAdmin && (
+        <>
+          {/* Overlay */}
+          <div 
+            className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity lg:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          {/* Menu Panel */}
+          <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 p-6 transition-transform lg:hidden ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className="flex items-center justify-between mb-8">
+              <span className="text-lg font-bold">Menu</span>
+              <button onClick={() => setIsMenuOpen(false)} className="p-2 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <NavLink to="/app" end onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Painel</NavLink>
+              <NavLink to="/app/pedidos" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Pedidos</NavLink>
+              <NavLink to="/app/revistas" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Catálogo</NavLink>
+              <NavLink to="/app/relatorios" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Relatórios</NavLink>
+              <NavLink to="/app/global-orders-report" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Relatório Geral</NavLink>
+              <div className="my-2 border-t border-slate-800" />
+              <div className="px-4 py-2 text-xs font-bold text-slate-500 uppercase">Administração</div>
+              <NavLink to="/app/congregacoes" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Congregações</NavLink>
+              <NavLink to="/app/revistas-admin" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Gerenciar Revistas</NavLink>
+              <NavLink to="/app/revistas-variacoes" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Variações</NavLink>
+              <NavLink to="/app/periodos" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Períodos</NavLink>
+              <NavLink to="/app/usuarios" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `px-4 py-3 rounded-lg text-sm ${isActive ? 'bg-emerald-600/20 text-emerald-400' : 'text-slate-300'}`}>Usuários</NavLink>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Modal de Alterar Senha */}
       {showChangePassword && (

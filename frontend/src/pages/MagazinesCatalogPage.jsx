@@ -48,7 +48,8 @@ export default function MagazinesCatalogPage() {
 
   const magazinesQuery = useQuery({
     queryKey: ['magazines'],
-    queryFn: () => apiRequest('/magazines')
+    queryFn: () => apiRequest('/magazines'),
+    onError: (err) => toast.error('Erro ao carregar catálogo: ' + err.message)
   });
 
   const handlePrint = () => {

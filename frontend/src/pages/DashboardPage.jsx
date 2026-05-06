@@ -18,15 +18,18 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const ordersQuery = useQuery({
-    queryKey: ['orders'],
-    queryFn: () => apiRequest('/orders'),
-    refetchInterval: 10000
-  });
-
   const periodsQuery = useQuery({
     queryKey: ['periods'],
     queryFn: () => apiRequest('/periods')
+  });
+
+  const activePeriod = periodsQuery.data?.periods?.find(p => p.active);
+
+  const ordersQuery = useQuery({
+    queryKey: ['orders', activePeriod?.id],
+    queryFn: () => apiRequest(`/orders${activePeriod ? `?periodId=${activePeriod.id}` : ''}`),
+    refetchInterval: 10000,
+    enabled: periodsQuery.isSuccess
   });
 
   const duplicateOrderMutation = useMutation({

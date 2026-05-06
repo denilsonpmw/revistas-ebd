@@ -54,7 +54,7 @@ export default function GlobalOrdersReportPage() {
 
   const periodsQuery = useQuery({
     queryKey: ['periods'],
-    queryFn: () => apiRequest('/periods')
+    queryFn: () => apiRequest('/periods/all')
   });
 
   const reportQuery = useQuery({

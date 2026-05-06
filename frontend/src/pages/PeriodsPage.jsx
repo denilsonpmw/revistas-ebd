@@ -217,20 +217,22 @@ export default function PeriodsPage() {
                         {period.active ? (
                           <button
                             onClick={() => deleteMutation.mutate(period.id)}
-                            className="text-red-400 hover:text-red-300"
+                            className="inline-flex items-center gap-1 rounded bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-600/30 transition-colors"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
+                            Inativar
                           </button>
                         ) : (
                           <button
                             onClick={() => editMutation.mutate({ id: period.id, active: true })}
-                            className="text-emerald-400 hover:text-emerald-300"
+                            className="inline-flex items-center gap-1 rounded bg-emerald-600/20 px-3 py-1 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/30 transition-colors"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
+                            Ativar
                           </button>
                         )}
                       </div>

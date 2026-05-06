@@ -51,7 +51,7 @@ export default function ReportsPage() {
 
   const periodsQuery = useQuery({
     queryKey: ['periods'],
-    queryFn: () => apiRequest('/periods')
+    queryFn: () => apiRequest('/periods/all')
   });
 
   const congregationsQuery = useQuery({

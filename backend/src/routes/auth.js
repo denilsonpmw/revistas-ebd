@@ -23,40 +23,46 @@ router.post('/request-link', async (req, res) => {
   let { whatsapp, password } = parse.data;
   whatsapp = whatsapp.replace(/[\s\-\(\)]/g, '');
 
-  const user = await prisma.user.findUnique({ where: { whatsapp } });
-  if (!user) {
-    return res.status(404).json({ message: 'WhatsApp ou senha incorretos' });
-  }
-  if (!user.active) {
-    return res.status(403).json({ message: 'Cadastro pendente de aprovação' });
-  }
+  try {
+    const user = await prisma.user.findUnique({ where: { whatsapp } });
 
-  // Validar senha
-  const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) {
-    return res.status(401).json({ message: 'WhatsApp ou senha incorretos' });
-  }
-
-  const token = uuidv4();
-  const minutes = Number(process.env.TOKEN_EXP_MINUTES || 15);
-  const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
-
-  await prisma.authToken.create({
-    data: {
-      whatsapp,
-      token,
-      expiresAt,
-      ip: req.ip,
-      userId: user.id
+    if (!user) {
+      return res.status(404).json({ message: 'WhatsApp ou senha incorretos' });
     }
-  });
+    if (!user.active) {
+      return res.status(403).json({ message: 'Cadastro pendente de aprovação' });
+    }
 
-  const base = process.env.WA_LINK_BASE || '';
-  const waLink = `${base}${encodeURIComponent(token)}`;
-  const front = process.env.FRONTEND_URL || '';
-  const verifyUrl = front ? `${front.replace(/\/$/, '')}/verificar?token=${encodeURIComponent(token)}` : null;
+    // Validar senha
+    const validPassword = await bcrypt.compare(password, user.password);
 
-  return res.json({ waLink, verifyUrl, expiresAt });
+    if (!validPassword) {
+      return res.status(401).json({ message: 'WhatsApp ou senha incorretos' });
+    }
+
+    const token = uuidv4();
+    const minutes = Number(process.env.TOKEN_EXP_MINUTES || 15);
+    const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
+
+    await prisma.authToken.create({
+      data: {
+        whatsapp,
+        token,
+        expiresAt,
+        ip: req.ip,
+        userId: user.id
+      }
+    });
+
+    const base = process.env.WA_LINK_BASE || '';
+    const waLink = `${base}${encodeURIComponent(token)}`;
+    const front = process.env.FRONTEND_URL || '';
+    const verifyUrl = front ? `${front.replace(/\/$/, '')}/verificar?token=${encodeURIComponent(token)}` : null;
+
+    return res.json({ waLink, verifyUrl, expiresAt });
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro ao gerar link de acesso' });
+  }
 });
 
 router.get('/verify', async (req, res) => {

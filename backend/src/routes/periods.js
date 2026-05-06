@@ -47,6 +47,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET all periods (for reports - includes inactive)
+router.get('/all', authRequired, async (req, res) => {
+  try {
+    const periods = await prisma.period.findMany({
+      orderBy: { startDate: 'desc' }
+    });
+    res.json({ periods });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET all periods (admin - includes inactive)
 router.get('/admin/all', authRequired, async (req, res) => {
   try {
@@ -55,7 +67,7 @@ router.get('/admin/all', authRequired, async (req, res) => {
       return res.status(403).json({ message: 'Acesso negado' });
     }
     const periods = await prisma.period.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { startDate: 'desc' }
     });
     res.json({ periods });
   } catch (error) {
@@ -123,7 +135,7 @@ router.patch('/:id', authRequired, async (req, res) => {
 });
 
 // DELETE soft delete period (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authRequired, async (req, res) => {
   try {
     // Verify user is ADMIN
     if (!req.user || req.user.role !== 'ADMIN') {
