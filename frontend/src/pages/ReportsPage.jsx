@@ -47,6 +47,7 @@ export default function ReportsPage() {
   const { user } = useAuth();
   const [periodId, setPeriodId] = useState('');
   const [congregationFilter, setCongregationFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const isAdmin = user?.role === 'ADMIN';
 
   const periodsQuery = useQuery({
@@ -106,10 +107,12 @@ export default function ReportsPage() {
   if (isAdmin) {
     rows = reportQuery.data?.rows || [];
     
-    // Filtra por congregação se selecionada
-    const filteredRows = congregationFilter 
-      ? rows.filter(row => row.congregationId === congregationFilter)
-      : rows;
+    // Filtra por congregação e status se selecionados
+    const filteredRows = rows.filter(row => {
+      if (congregationFilter && row.congregationId !== congregationFilter) return false;
+      if (statusFilter && row.status !== statusFilter) return false;
+      return true;
+    });
     
     totalQuantity = filteredRows.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
     totalValue = filteredRows.reduce((sum, row) => sum + Number(row.totalValue || 0), 0);
@@ -183,6 +186,9 @@ export default function ReportsPage() {
     }
     
     rows = Array.from(rowsMap.values());
+    if (statusFilter) {
+      rows = rows.filter(row => row.status === statusFilter);
+    }
     totalQuantity = rows.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
     totalValue = rows.reduce((sum, row) => sum + Number(row.totalValue || 0), 0);
 
@@ -233,7 +239,7 @@ export default function ReportsPage() {
           </div>
 
           <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-${isAdmin ? '3' : '2'} gap-4`}>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Selecione o Período
@@ -272,6 +278,24 @@ export default function ReportsPage() {
                   </select>
                 </div>
               )}
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Filtrar por Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="rounded border border-slate-700 bg-slate-950 px-4 py-2 text-sm w-full"
+                  disabled={!periodId}
+                >
+                  <option value="">Todos os status</option>
+                  <option value="PENDING">Pendente</option>
+                  <option value="APPROVED">Pago</option>
+                  <option value="DELIVERED">Entregue</option>
+                  <option value="CANCELED">Cancelado</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

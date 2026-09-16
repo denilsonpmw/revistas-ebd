@@ -19,8 +19,25 @@ const { authRequired } = require('./middleware/auth');
 const app = express();
 
 app.use(helmet());
+const configuredFrontendUrl = process.env.FRONTEND_URL;
+const allowedOrigins = new Set(
+  [configuredFrontendUrl, 'http://localhost:5173', 'http://localhost:5174'].filter(Boolean)
+);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*'
+  origin(origin, callback) {
+    // Permite chamadas server-to-server e ferramentas sem header Origin.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isLocalhost = /^http:\/\/localhost:\d+$/.test(origin);
+    if (allowedOrigins.has(origin) || isLocalhost) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Origin não permitida pelo CORS'));
+  }
 }));
 app.use(express.json());
 app.use(morgan('dev'));
